@@ -1,4 +1,5 @@
 const path = require('path')
+const srcPath = path.resolve(__dirname, 'src')
 
 module.exports = {
   entry: './src/index.js',
@@ -7,10 +8,29 @@ module.exports = {
     path: path.resolve(__dirname, 'build'),
   },
   resolve: {
-    extensions: ['', 'js'],
     modules: [
       'node_modules',
-      'src',
+      srcPath,
     ],
+  },
+  module: {
+    rules: [{
+      test: /\.js$/,
+      use: [
+        {
+          loader: 'babel-loader',
+          options: {
+            cacheDirectory: true,
+          },
+        },
+        {
+          loader: 'eslint-loader',
+          options: {
+            failOnError: false,
+          }
+        },
+      ],
+      include: './src',
+    }],
   },
 }
