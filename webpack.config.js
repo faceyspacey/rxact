@@ -3,10 +3,6 @@ const srcPath = path.resolve(__dirname, 'src')
 
 module.exports = {
   entry: './src/index.js',
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'build'),
-  },
   resolve: {
     modules: [
       'node_modules',
@@ -30,7 +26,11 @@ module.exports = {
           }
         },
       ],
-      include: './src',
+      include: srcPath,
     }],
+  },
+  output: {
+    library: 'rxcat',
+    libraryTarget: 'umd',
   },
 }

@@ -7,6 +7,7 @@
     },
     "extends": [
       "eslint:recommended",
+      "plugin:react/recommended",
       "plugin:import/errors",
       "plugin:import/warnings",
       "plugin:flowtype/recommended"
@@ -21,7 +22,8 @@
     "plugins": [
       "import",
       "jest",
-      "flowtype"
+      "flowtype",
+      "react"
     ],
     "rules": {
         "indent": [2, 2, {"SwitchCase": 1}],
@@ -29,6 +31,7 @@
             "error",
             "unix"
         ],
+        "max-len": [2, 90, 4, {"ignoreUrls": true}],
         "quotes": [
             "error",
             "single"
