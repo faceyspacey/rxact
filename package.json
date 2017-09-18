@@ -1,6 +1,6 @@
 {
   "name": "rxact",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "lib/index.js",
   "repository": "git@github.com:Darmody/rxact.git",
   "author": "Darmody <eterlf41@gmail.com>",
