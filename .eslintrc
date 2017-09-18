@@ -1,12 +1,16 @@
 {
+    "parser": "babel-eslint",
     "env": {
         "browser": true,
-        "es6": true
+        "es6": true,
+        "jest/globals": true
     },
     "extends": [
       "eslint:recommended",
+      "plugin:react/recommended",
       "plugin:import/errors",
-      "plugin:import/warnings"
+      "plugin:import/warnings",
+      "plugin:flowtype/recommended"
     ],
     "parserOptions": {
         "ecmaFeatures": {
@@ -16,7 +20,10 @@
         "sourceType": "module"
     },
     "plugins": [
-      "import"
+      "import",
+      "jest",
+      "flowtype",
+      "react"
     ],
     "rules": {
         "indent": [2, 2, {"SwitchCase": 1}],
@@ -24,6 +31,7 @@
             "error",
             "unix"
         ],
+        "max-len": [2, 90, 4, {"ignoreUrls": true}],
         "quotes": [
             "error",
             "single"
@@ -34,6 +42,13 @@
         ]
     },
     "settings": {
-      "import/resolver": "webpack"
+      "import/resolver": {
+        "node": {
+          "extensions": [".js", ".json"]
+        },
+        "webpack": {
+          "config": 'webpack.config.js'
+        }
+      }
     }
 }

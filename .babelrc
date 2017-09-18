@@ -1,11 +1,21 @@
 {
   "presets": [
     ["env", { "modules": false }],
+    "react",
     "flow"
+  ],
+  "plugins": [
+    "transform-class-properties",
+    "transform-object-rest-spread"
   ],
   "env": {
     "test": {
-      "plugins": ["transform-es2015-modules-commonjs"]
+      "plugins": [
+        "transform-es2015-modules-commonjs",
+        "transform-object-rest-spread",
+        "transform-class-properties",
+        "babel-jest-assertions"
+      ]
     }
   }
 }
