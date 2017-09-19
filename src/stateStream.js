@@ -29,9 +29,11 @@ const createSource = (
 
   let state$ = Rx.Observable
     .create((observer) => {
-      emitter.listen(updater => {
+      emitter.listen((updater, observable) => {
         if (typeof updater !== 'function') {
           observer.next(updater)
+        } else if (observable){
+          updater(Rx.Observable.of(prevState)).subscribe(value => observer.next(value))
         } else {
           observer.next(updater(prevState))
         }

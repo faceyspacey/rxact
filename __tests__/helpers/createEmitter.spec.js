@@ -21,4 +21,20 @@ describe('createEmitter', () => {
 
     action(newState)
   })
+
+  it('create an observable event function for emiiting state for stream', () => {
+    const initialState = 'initialState'
+    const newState = 'newState'
+
+    const source = createSourceStateStream('source', initialState)
+    const emitter = createEmitter(source.emit)
+
+    const asyncAction = emitter((state$) => state$.mapTo(newState), true)
+
+    source.state$.skip(1).subscribe(state => {
+      expect(state).toEqual(newState)
+    })
+
+    asyncAction()
+  })
 })

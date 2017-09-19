@@ -28,7 +28,7 @@ describe('createSourceStateStream', () => {
     emit(newState)
   })
 
-  it('emit can push state directly if updater is not a function', () => {
+  it('emit(state) can push state directly if updater is not a function', () => {
     const initialState = 'initialState'
     const newState = 'newState'
     const { state$, emit } = createSourceStateStream('source', initialState)
@@ -38,6 +38,19 @@ describe('createSourceStateStream', () => {
     })
 
     emit(newState)
+  })
+
+  it('emit(f, true) is async mode', () => {
+    const initialState = 'initialState'
+    const newState = 'newState'
+    const { state$, emit } = createSourceStateStream('source', initialState)
+
+    state$.skip(1).subscribe(state => {
+      expect(state).toEqual(newState)
+    })
+
+    const updater = state$ => state$.mapTo(newState)
+    emit(updater, true)
   })
 
   it('can access previous state when emit new state', () => {
