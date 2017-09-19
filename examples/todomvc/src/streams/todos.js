@@ -1,8 +1,10 @@
 import { createSourceStateStream } from 'rxact/stateStream'
+import createEmitter from 'rxact/helpers/createEmitter'
 
 const todos = createSourceStateStream('todos', [])
+const emitter = createEmitter(todos.emit)
 
-todos.add = text => todos.emit(state => [
+todos.add = emitter((state, text) => [
   ...state,
   {
     text,
@@ -11,22 +13,22 @@ todos.add = text => todos.emit(state => [
   },
 ])
 
-todos.edit = (id, text) => todos.emit(state =>
+todos.edit = emitter((state, id, text) =>
   state.map(todo => todo.id === id ? { ...todo, text } : todo)
 )
 
-todos.delete = id => todos.emit(state =>
+todos.delete = emitter((state, id) =>
   state.filter(todo => todo.id !== id )
 )
 
-todos.complete = (id) => todos.emit(state =>
+todos.complete = emitter((state, id) =>
   state.map(todo => todo.id === id ?
     { ...todo, completed: !todo.completed } :
     todo
   )
 )
 
-todos.completeAll = () => todos.emit(state => {
+todos.completeAll = emitter(state => {
   const areAllMarked = state.every(todo => todo.completed)
 
   return state.map(todo => ({
@@ -35,7 +37,7 @@ todos.completeAll = () => todos.emit(state => {
   }))
 })
 
-todos.clearCompleted = () => todos.emit(state =>
+todos.clearCompleted = emitter(state =>
   state.filter(todo => todo.completed === false)
 )
 
