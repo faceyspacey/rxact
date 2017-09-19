@@ -45,9 +45,6 @@
       "import/resolver": {
         "node": {
           "extensions": [".js", ".json"]
-        },
-        "webpack": {
-          "config": 'webpack.config.js'
         }
       }
     }
