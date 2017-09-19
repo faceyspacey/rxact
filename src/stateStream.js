@@ -1,6 +1,7 @@
 // @flow
 import Rx from 'rxjs'
 import { createChangeEmitter } from 'change-emitter'
+import createConnect from './createConnect'
 
 export const SOURCE = 'SOURCE'
 export const RELAY = 'RELAY'
@@ -10,6 +11,7 @@ export interface StateStream {
   name: string,
   state$: Rx.Observable,
   type: StreamType,
+  connect: Function,
 }
 
 type SourceStateStream = StateStream & { type: 'SOURCE', emit: Function }
@@ -51,6 +53,7 @@ const createSource = (
     state$,
     type: SOURCE,
     emit: emitter.emit,
+    connect: createConnect(state$),
   }
 }
 
@@ -95,6 +98,7 @@ const createRelay = (
     name,
     state$,
     type: RELAY,
+    connect: createConnect(state$),
   }
 }
 

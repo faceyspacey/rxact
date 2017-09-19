@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import connect from 'rxact/connect'
 import counter from './stateStream'
 
 class Counter extends Component {
@@ -44,7 +43,6 @@ Counter.propTypes = {
   value: PropTypes.number.isRequired,
 }
 
-export default connect(
-  counter,
+export default counter.connect(
   (state => ({ value: state })),
 )(Counter)

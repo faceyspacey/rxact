@@ -1,44 +1,32 @@
 import React from 'react'
 import { shallow } from 'enzyme'
-import connect from '../src/connect'
-import {
-  createSourceStateStream,
-  createRelayStateStream,
-} from '../src/stateStream'
+import createConnect from '../src/createConnect'
+import { createSourceStateStream } from '../src/stateStream'
 
-describe('connect', () => {
-  it('throw if stateStream is not instance of StateStream', () => {
-    const Component = () => (
-      <div>Test Component</div>
-    )
+describe('createConnect', () => {
+  it('throw if state$ is not instance of Observable', () => {
     expect(() =>
-      connect(createSourceStateStream('source'))(Component)
+      createConnect(createSourceStateStream('source').state$)
     ).not.toThrow()
 
-    expect(() => {
-      const source = createSourceStateStream('source')
-      const stream = createRelayStateStream('stream', [source])
-      connect(stream)(Component)
-    }).not.toThrow()
-
     expect(() =>
-      connect()(Component)
+      createConnect()
     ).toThrow()
 
     expect(() =>
-      connect('')(Component)
+      createConnect('')
     ).toThrow()
 
     expect(() =>
-      connect(1)(Component)
+      createConnect(1)
     ).toThrow()
 
     expect(() =>
-      connect({})(Component)
+      createConnect({})
     ).toThrow()
 
     expect(() =>
-      connect(Symbol(''))(Component)
+      createConnect(Symbol(''))
     ).toThrow()
   })
 
@@ -49,7 +37,7 @@ describe('connect', () => {
     const state = { state: 'state' }
     const source = createSourceStateStream('source', state)
 
-    const Container = connect(source)(Component)
+    const Container = source.connect()(Component)
 
     const wrapper = shallow(<Container />)
 
@@ -64,7 +52,7 @@ describe('connect', () => {
     const source = createSourceStateStream('source', state)
     const observer = state$ => state$.mapTo({ stateC: 'stateC' })
 
-    const Container = connect(source, null, observer)(Component)
+    const Container = source.connect(null, observer)(Component)
 
     const wrapper = shallow(<Container />)
 
@@ -79,7 +67,7 @@ describe('connect', () => {
     const source = createSourceStateStream('source', state)
     const selector = state => ({ stateB: state.stateB })
 
-    const Container = connect(source, selector)(Component)
+    const Container = source.connect(selector)(Component)
 
     const wrapper = shallow(<Container />)
 

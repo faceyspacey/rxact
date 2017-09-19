@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import connect from 'rxact/connect'
 import stream from '../streams/todos'
 import TodoItem from './TodoItem'
 import Footer from './Footer'
@@ -81,8 +80,7 @@ class MainSection extends Component {
   }
 }
 
-export default connect(
-  stream,
+export default stream.connect(
   (todos) => ({
     todos,
     completedCount: todos.reduce((count, todo) =>
