@@ -1,3 +1,13 @@
-import * as stateStream from './stateStream'
+import {
+  createStateStream,
+  createSourceStateStream,
+  createRelayStateStream,
+} from './stateStream'
+import connect from './connect'
 
-export default stateStream
+export default {
+  createStateStream,
+  createSourceStateStream,
+  createRelayStateStream,
+  connect,
+}

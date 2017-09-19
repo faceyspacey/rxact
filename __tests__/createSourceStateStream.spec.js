@@ -57,4 +57,15 @@ describe('createSourceStateStream', () => {
       return prevState
     })
   })
+
+  it('applies observer if it passed', () => {
+    const initialState = 'initialState'
+    const newState = 'newState'
+    const observer = state$ => state$.mapTo(newState)
+    const { state$ } = createSourceStateStream('source', initialState, observer)
+
+    state$.subscribe(state => {
+      expect(state).toEqual(newState)
+    })
+  })
 })

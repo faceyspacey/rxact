@@ -37,7 +37,7 @@ describe('createStateStream', () => {
     ).not.toThrow()
 
     expect(() =>
-      createStateStream('stream', RELAY, createStateStream('source', SOURCE))
+      createStateStream('stream', RELAY, null, [createStateStream('source', SOURCE)])
     ).not.toThrow()
 
     expect(() =>

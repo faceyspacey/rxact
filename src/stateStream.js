@@ -14,13 +14,18 @@ export interface StateStream {
 
 type SourceStateStream = StateStream & { type: 'SOURCE', emit: Function }
 type RelayStateStream = StateStream & { type: 'RELAY' }
+type Observer = Rx.Observable => Rx.Observable
 
-const createSource = (name: string, initialState?: any): SourceStateStream => {
+const createSource = (
+  name: string,
+  initialState?: any,
+  observer?: Observer,
+): SourceStateStream => {
   const emitter = createChangeEmitter()
 
   let prevState = null
 
-  const state$ = Rx.Observable
+  let state$ = Rx.Observable
     .create((observer) => {
       emitter.listen(updater => {
         if (typeof updater !== 'function') {
@@ -31,10 +36,15 @@ const createSource = (name: string, initialState?: any): SourceStateStream => {
       })
     })
     .startWith(initialState)
-    .map(state => {
-      prevState = state
-      return state
-    })
+
+  if (typeof observer === 'function') {
+    state$ = observer(state$)
+  }
+
+  state$ = state$.map(state => {
+    prevState = state
+    return state
+  })
 
   return {
     name,
@@ -44,7 +54,11 @@ const createSource = (name: string, initialState?: any): SourceStateStream => {
   }
 }
 
-const createRelay = (name: string, sources: Array<StateStream>): RelayStateStream => {
+const createRelay = (
+  name: string,
+  sources: Array<StateStream>,
+  observer?: Observer,
+): RelayStateStream => {
   if (sources.length === 0) {
     throw new Error('Expected the sources to be passed.')
   }
@@ -63,7 +77,7 @@ const createRelay = (name: string, sources: Array<StateStream>): RelayStateStrea
   }
 
   const states$ = sources.map(source => source.state$)
-  const state$ = Rx.Observable.combineLatest(...states$, (...states) => {
+  let state$ = Rx.Observable.combineLatest(...states$, (...states) => {
     let state = {}
 
     sources.forEach((source, index) => {
@@ -72,6 +86,10 @@ const createRelay = (name: string, sources: Array<StateStream>): RelayStateStrea
 
     return state
   })
+
+  if (typeof observer === 'function') {
+    state$ = observer(state$)
+  }
 
   return {
     name,
@@ -84,7 +102,8 @@ export const createStateStream = (
   name: string,
   type: StreamType,
   initialState: any,
-  ...sources: Array<StateStream>
+  sources?: Array<StateStream>,
+  observer?: Observer,
 ) => {
   if (typeof name !== 'string' || !name) {
     throw new Error('Expected the name to be a not none string.')
@@ -100,9 +119,9 @@ export const createStateStream = (
   let streamType = type.toUpperCase()
 
   if (streamType === SOURCE) {
-    return createSource(name, initialState)
+    return createSource(name, initialState, observer)
   } else if (streamType === RELAY) {
-    return createRelay(name, [initialState, ...sources])
+    return createRelay(name, sources || [], observer)
   }
 
   return null
@@ -110,10 +129,12 @@ export const createStateStream = (
 
 export const createSourceStateStream = (
   name: string,
-  initialState?: any
-) => createStateStream(name, SOURCE, initialState)
+  initialState?: any,
+  observer?: Observer,
+) => createStateStream(name, SOURCE, initialState, [], observer)
 
 export const createRelayStateStream = (
   name: string,
-  sources: Array<StateStream>
-) => createStateStream(name, RELAY, ...sources)
+  sources: Array<StateStream>,
+  observer?: Observer,
+) => createStateStream(name, RELAY, null, sources, observer)
