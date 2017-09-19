@@ -46,6 +46,5 @@ Counter.propTypes = {
 
 export default connect(
   counter,
-  null,
   (state => ({ value: state })),
 )(Counter)

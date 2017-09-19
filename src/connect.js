@@ -14,9 +14,13 @@ type State = {
 type Props = {
 }
 
-const connect = (
-  stateStream: StateStream, observer?: Observer, selector?: Selector,
-) => (WrappedComponent: ComponentType<any>) => {
+type Connect = (
+  stateStream: StateStream,
+  selector?: Selector,
+  observer?: Observer,
+) => (WrappedComponent: ComponentType<any>) => ComponentType<any>
+
+const connect: Connect = (stateStream, selector, observer) => (WrappedComponent) => {
   if (!stateStream
     || typeof stateStream !== 'object'
     || !(stateStream.state$ instanceof Rx.Observable)
@@ -24,7 +28,7 @@ const connect = (
     throw new Error('Expect stateStream to be instance of StateStream')
   }
 
-  return class Container extends PureComponent<Props, State> {
+  return class Connect extends PureComponent<Props, State> {
     state = {
       streamState: {}
     }

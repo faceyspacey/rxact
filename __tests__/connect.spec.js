@@ -64,7 +64,7 @@ describe('connect', () => {
     const source = createSourceStateStream('source', state)
     const observer = state$ => state$.mapTo({ stateC: 'stateC' })
 
-    const Container = connect(source, observer)(Component)
+    const Container = connect(source, null, observer)(Component)
 
     const wrapper = shallow(<Container />)
 
@@ -79,7 +79,7 @@ describe('connect', () => {
     const source = createSourceStateStream('source', state)
     const selector = state => ({ stateB: state.stateB })
 
-    const Container = connect(source, null, selector)(Component)
+    const Container = connect(source, selector)(Component)
 
     const wrapper = shallow(<Container />)
 
