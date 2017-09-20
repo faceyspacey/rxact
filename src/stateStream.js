@@ -14,55 +14,98 @@ export interface StateStream {
   connect: Function,
 }
 
-type SourceStateStream = StateStream & { type: 'SOURCE', emit: Function }
+type SourceStateStream = StateStream & { type: 'SOURCE', createEvent: Function }
 type RelayStateStream = StateStream & { type: 'RELAY' }
-type Observer = Rx.Observable => Rx.Observable
 
 const createSource = (
   name: string,
   initialState?: any,
-  observer?: Observer,
 ): SourceStateStream => {
-  const emitter = createChangeEmitter()
+  const stateEmitter = createChangeEmitter()
+  const eventEmitter = createChangeEmitter()
+  let observers = []
 
-  let prevState = null
+  const currentState$ = Rx.Observable.create((observer) => {
+    stateEmitter.listen(value => observer.next(value))
+  }).startWith(initialState)
 
-  let state$ = Rx.Observable
+  let currentState = initialState
+
+  const event$ = Rx.Observable
     .create((observer) => {
-      emitter.listen((updater, observable) => {
-        if (typeof updater !== 'function') {
-          observer.next(updater)
-        } else if (observable){
-          updater(Rx.Observable.of(prevState)).subscribe(value => observer.next(value))
-        } else {
-          observer.next(updater(prevState))
-        }
-      })
+      eventEmitter.listen(value => observer.next(value))
     })
-    .startWith(initialState)
+    .mergeMap((event) => {
+      const currentObserver = observers.find(observer => observer === event.type)
+      const currentEvent$ = Rx.Observable.of({ state: currentState })
 
-  if (typeof observer === 'function') {
-    state$ = observer(state$)
+      if (currentObserver) {
+        return currentObserver(currentEvent$, ...event.params).map(state => ({
+          state,
+          hookEmitter: currentObserver.hookEmitter,
+        }))
+      }
+
+      return Rx.Observable.empty()
+    })
+
+  event$.subscribe(event => {
+    if (!event) { return }
+
+    const { state: updater, hookEmitter } = event
+
+    if (updater === undefined) { return }
+
+    let nextState = updater
+    if (typeof updater === 'function') {
+      nextState = updater(currentState)
+    }
+    currentState = nextState
+    stateEmitter.emit(nextState)
+
+    if (hookEmitter) {
+      hookEmitter.emit({ state: nextState })
+    }
+  })
+
+  const createEvent = fn => {
+    if (typeof fn !== 'function') {
+      throw new Error('Expected param of createEvent to be a function.')
+    }
+
+    const hookEmitter = createChangeEmitter()
+    const hook$ = Rx.Observable.create((observer) => {
+      hookEmitter.listen(value => observer.next(value))
+    })
+
+    fn.hookEmitter = hookEmitter
+
+    observers = [...observers, fn]
+
+    return (...params) => {
+
+      eventEmitter.emit({
+        type: fn,
+        params,
+      })
+
+      return hook$.first()
+    }
   }
 
-  state$ = state$.map(state => {
-    prevState = state
-    return state
-  })
 
   return {
     name,
-    state$,
+    createEvent,
+    state$: currentState$,
     type: SOURCE,
-    emit: emitter.emit,
-    connect: createConnect(state$),
+    connect: createConnect(currentState$),
   }
 }
 
 const createRelay = (
   name: string,
   sources: Array<StateStream>,
-  observer?: Observer,
 ): RelayStateStream => {
   if (sources.length === 0) {
     throw new Error('Expected the sources to be passed.')
@@ -82,7 +125,7 @@ const createRelay = (
   }
 
   const states$ = sources.map(source => source.state$)
-  let state$ = Rx.Observable.combineLatest(...states$, (...states) => {
+  const state$ = Rx.Observable.combineLatest(...states$, (...states) => {
     let state = {}
 
     sources.forEach((source, index) => {
@@ -91,10 +134,6 @@ const createRelay = (
 
     return state
   })
-
-  if (typeof observer === 'function') {
-    state$ = observer(state$)
-  }
 
   return {
     name,
@@ -109,7 +148,6 @@ export const createStateStream = (
   type: StreamType,
   initialState: any,
   sources?: Array<StateStream>,
-  observer?: Observer,
 ) => {
   if (typeof name !== 'string' || !name) {
     throw new Error('Expected the name to be a not none string.')
@@ -125,9 +163,9 @@ export const createStateStream = (
   let streamType = type.toUpperCase()
 
   if (streamType === SOURCE) {
-    return createSource(name, initialState, observer)
+    return createSource(name, initialState)
   } else if (streamType === RELAY) {
-    return createRelay(name, sources || [], observer)
+    return createRelay(name, sources || [])
   }
 
   return null
@@ -136,11 +174,9 @@ export const createStateStream = (
 export const createSourceStateStream = (
   name: string,
   initialState?: any,
-  observer?: Observer,
-) => createStateStream(name, SOURCE, initialState, [], observer)
+) => createStateStream(name, SOURCE, initialState, [])
 
 export const createRelayStateStream = (
   name: string,
   sources: Array<StateStream>,
-  observer?: Observer,
-) => createStateStream(name, RELAY, null, sources, observer)
+) => createStateStream(name, RELAY, null, sources)

@@ -3,12 +3,6 @@ import PropTypes from 'prop-types'
 import counter from './stateStream'
 
 class Counter extends Component {
-  incrementIfOdd = () => {
-    if (this.props.value % 2 !== 0) {
-      counter.increment()
-    }
-  }
-
   render() {
     const { value } = this.props
     return (
@@ -23,7 +17,7 @@ class Counter extends Component {
           -
         </button>
         {' '}
-        <button onClick={this.incrementIfOdd}>
+        <button onClick={counter.incrementIfOdd}>
           Increment if odd
         </button>
         {' '}

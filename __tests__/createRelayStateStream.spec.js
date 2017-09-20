@@ -92,36 +92,8 @@ describe('createRelayStateStream', () => {
         }
       })
 
-    sourceA.emit('AA')
-    sourceB.emit('BB')
-    sourceC.emit('CC')
-  })
-
-  it('applies observer if it passed', () => {
-    const sourceA = createSourceStateStream('sourceA', 'A')
-    const sourceB = createSourceStateStream('sourceB', 'B')
-    const sourceC = createSourceStateStream('sourceC', 'C')
-    const observer = state$ => state$.map(state => ({
-      ...state,
-      sourceAll: {
-        A: state.sourceA,
-        B: state.sourceB,
-        C: state.sourceC,
-      },
-    }))
-    const stream = createRelayStateStream('stream', [sourceA, sourceB, sourceC], observer)
-
-    stream.state$.subscribe(state => {
-      expect(state).toEqual({
-        sourceA: 'A',
-        sourceB: 'B',
-        sourceC: 'C',
-        sourceAll: {
-          A: 'A',
-          B: 'B',
-          C: 'C',
-        }
-      })
-    })
+    sourceA.createEvent((state$) => state$.mapTo('AA'))()
+    sourceB.createEvent((state$) => state$.mapTo('BB'))()
+    sourceC.createEvent((state$) => state$.mapTo('CC'))()
   })
 })

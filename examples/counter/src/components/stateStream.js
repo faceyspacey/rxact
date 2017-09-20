@@ -1,13 +1,28 @@
 import { createSourceStateStream } from 'rxact/stateStream'
-import createEmitter from 'rxact/helpers/createEmitter'
 
 const counter = createSourceStateStream('counter', 0)
-const emitter = createEmitter(counter.emit)
+const createEvent = counter.createEvent
+const updater = diff => count => (count + diff)
 
-const increment = count => (count + 1)
-counter.increment = emitter(increment)
-counter.incrementAsync = emitter(count$ => count$.delay(1).map(increment), true)
+counter.increment = createEvent(event$ => event$
+  .pluck('state')
+  .map(updater(1))
+)
 
-counter.decrement = emitter(count => (count - 1))
+counter.incrementAsync = createEvent(event$ => event$
+  .delay(1000)
+  .mapTo(updater(1))
+)
+
+counter.decrement = createEvent(event$ => event$
+  .pluck('state')
+  .map(updater(-1))
+)
+
+counter.incrementIfOdd = createEvent(event$ => event$
+  .pluck('state')
+  .skipWhile(state => state % 2 === 0)
+  .map(updater(1))
+)
 
 export default counter

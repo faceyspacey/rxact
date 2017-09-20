@@ -7,13 +7,37 @@ describe('createSourceStateStream', () => {
     expect(stream.name).toBeDefined()
     expect(stream.state$).toBeDefined()
     expect(stream.type).toEqual(SOURCE)
-    expect(stream.emit).toBeDefined()
+    expect(stream.createEvent).toBeDefined()
+    expect(stream.connect).toBeDefined()
   })
 
-  it('map new state after emitting state', () => {
+  it('throw error if passing param is not a function for createEvent', () => {
+    expect(() => {
+      createSourceStateStream('stream', '').createEvent(() => {})
+    }).not.toThrow()
+
+    expect(() => {
+      createSourceStateStream('stream', '').createEvent()
+    }).toThrow()
+
+    expect(() => {
+      createSourceStateStream('stream', '').createEvent('')
+    }).toThrow()
+
+    expect(() => {
+      createSourceStateStream('stream', '').createEvent(1)
+    }).toThrow()
+
+    expect(() => {
+      createSourceStateStream('stream', '').createEvent({})
+    }).toThrow()
+  })
+
+  it('update state through event', () => {
     const initialState = 'initialState'
     const newState = 'newState'
-    const { state$, emit } = createSourceStateStream('source', initialState)
+    const { state$, createEvent } = createSourceStateStream('source', initialState)
+    const emit = createEvent((event$, value) => event$.mapTo(value))
     let index = 0
 
     state$.subscribe((state) => {
@@ -28,57 +52,100 @@ describe('createSourceStateStream', () => {
     emit(newState)
   })
 
-  it('emit(state) can push state directly if updater is not a function', () => {
-    const initialState = 'initialState'
+  it('update state through event by updater', () => {
+    const initialState = { initialState: 'initialState' }
     const newState = 'newState'
-    const { state$, emit } = createSourceStateStream('source', initialState)
+    const { state$, createEvent } = createSourceStateStream('source', initialState)
+    const emit = createEvent((event$, value) =>
+      event$.mapTo((state) => ({ ...state, value: value }))
+    )
+    let index = 0
 
-    state$.skip(1).subscribe(state => {
-      expect(state).toEqual(newState)
+    state$.subscribe((state) => {
+      if (index === 0) {
+        expect(state).toEqual(initialState)
+        index += 1
+      } else if (index === 1) {
+        expect(state).toEqual({ ...initialState, value: newState })
+      }
     })
 
     emit(newState)
   })
 
-  it('emit(f, true) is async mode', () => {
-    const initialState = 'initialState'
-    const newState = 'newState'
-    const { state$, emit } = createSourceStateStream('source', initialState)
+  it('do not update state if return undefined in event stream', () => {
+    const initialState = { initialState: 'initialState' }
+    const { state$, createEvent } = createSourceStateStream('source', initialState)
+    const emit = createEvent(event$ => event$.mapTo(undefined))
+    const subscribe = jest.fn()
 
-    state$.skip(1).subscribe(state => {
-      expect(state).toEqual(newState)
-    })
+    state$.subscribe(subscribe)
+    emit()
 
-    const updater = state$ => state$.mapTo(newState)
-    emit(updater, true)
+    expect(subscribe).toHaveBeenCalledTimes(1)
   })
 
-  it('can access previous state when emit new state', () => {
-    const initialState = 'initialState'
-    const newState = 'newState'
-    const { state$, emit } = createSourceStateStream('source', initialState)
+  it('get stream return by event', (done) => {
+    const initialState = 0
+    const { state$, createEvent } = createSourceStateStream('source', initialState)
+    const emit = createEvent((event$, state) => event$.mapTo(state))
+    let index = 0
 
-    state$.subscribe(() => {})
-
-    emit((prevState) => {
-      expect(prevState).toEqual(initialState)
-      return newState
+    state$.subscribe((state) => {
+      if (index === 0) {
+        expect(state).toEqual(0)
+        index += 1
+      } else if (index === 1) {
+        expect(state).toEqual(1)
+        index += 1
+      } else if (index === 2) {
+        expect(state).toEqual(3)
+        index += 1
+      } else if (index === 3) {
+        expect(state).toEqual(2)
+        done()
+      }
     })
 
-    emit((prevState) => {
-      expect(prevState).toEqual(newState)
-      return prevState
-    })
+    emit(1).delay(10).do(() => emit(2)).subscribe()
+    emit(3)
   })
 
-  it('applies observer if it passed', () => {
-    const initialState = 'initialState'
+  it('update state correctly in asynchronous way', (done) => {
+    const initialState = { initialState: 'initialState' }
     const newState = 'newState'
-    const observer = state$ => state$.mapTo(newState)
-    const { state$ } = createSourceStateStream('source', initialState, observer)
+    const newState2 = 'newState2'
+    const { state$, createEvent } = createSourceStateStream('source', initialState)
+    const emit = createEvent((event$, value) =>
+      event$.mapTo((state) => ({ ...state, newState: value }))
+    )
 
-    state$.subscribe(state => {
-      expect(state).toEqual(newState)
+    const emitAsync = createEvent((event$, value) =>
+      event$
+        .delay(10)
+        .mapTo((state) => ({ ...state, newState2: value }))
+    )
+
+    let index = 0
+
+    state$.subscribe((state) => {
+      if (index === 0) {
+        expect(state).toEqual(initialState)
+        index += 1
+      } else if (index === 1) {
+        index += 1
+        expect(state).toEqual({ ...initialState, newState: newState })
+      } else if (index === 2) {
+        expect(state).toEqual({
+          ...initialState,
+          newState,
+          newState2,
+        })
+        done()
+      }
     })
+
+    emitAsync(newState2)
+    emit(newState)
   })
 })

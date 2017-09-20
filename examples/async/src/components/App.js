@@ -34,7 +34,7 @@ class App extends Component {
             </span>
           }
           {!isFetching &&
-            <button onClick={() => stream.clearCache(selectedReddit)}>
+            <button onClick={stream.fetchPosts}>
               Refresh
             </button>
           }
