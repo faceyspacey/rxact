@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+cp -r ./../../lib/ ./node_modules/rxact
+
+react-scripts start
