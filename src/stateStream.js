@@ -1,6 +1,5 @@
 // @flow
 import Rx from 'rxjs'
-import { createChangeEmitter } from 'change-emitter'
 import createConnect from './createConnect'
 
 export const SOURCE = 'SOURCE'
@@ -13,6 +12,7 @@ export interface StateStream {
   type: StreamType,
   connect: Function,
   observe: Function,
+  getState?: Function,
 }
 
 type SourceStateStream = StateStream & { type: 'SOURCE', createEvent: Function }
@@ -36,71 +36,62 @@ const createSource = (
   name: string,
   initialState?: any,
 ): SourceStateStream => {
-  const eventEmitter = createChangeEmitter()
-  let observers = []
-
   const stateSource$ = Rx.Observable.create(() => {})
-
   const stateSubject = new Rx.BehaviorSubject(initialState)
   const currentState$ = stateSource$.multicast(stateSubject).refCount()
 
-  const event$ = Rx.Observable
-    .create((observer) => {
-      eventEmitter.listen(value => observer.next(value))
-    })
-    .mergeMap((event) => {
-      const currentObserver = observers.find(observer => observer === event.type)
+  const eventSource$ = Rx.Observable.create(() => {})
+  const eventSubject = new Rx.Subject()
+  const event$ = eventSource$.multicast(eventSubject).refCount()
+
+  event$
+    .mergeMap(({ fn, params, subject }) => {
       const currentEvent$ = Rx.Observable.of({
         state: stateSubject.getValue(),
       })
 
-      if (currentObserver) {
-        return currentObserver(currentEvent$, ...event.params).map(state => ({
+      if (fn) {
+        return fn(currentEvent$, ...params).map(state => ({
           state,
-          subject: currentObserver.subject,
+          subject,
         }))
       }
 
       return Rx.Observable.empty()
     })
+    .subscribe(event => {
+      if (!event) { return }
 
-  event$.subscribe(event => {
-    if (!event) { return }
+      const {
+        state: updater,
+        subject,
+      } = event
 
-    const { state: updater, subject } = event
+      if (updater === undefined) { return }
 
-    if (updater === undefined) { return }
+      let nextState = updater
 
-    let nextState = updater
+      if (typeof updater === 'function') {
+        nextState = updater(stateSubject.getValue())
+      }
 
-    if (typeof updater === 'function') {
-      nextState = updater(stateSubject.getValue())
-    }
+      stateSubject.next(nextState)
 
-    stateSubject.next(nextState)
-
-    if (subject) {
-      subject.next({ state: nextState })
-    }
-  })
+      if (subject) {
+        subject.next()
+      }
+    })
 
   const createEvent = fn => {
     if (typeof fn !== 'function') {
       throw new Error('Expected param of createEvent to be a function.')
     }
 
-    const subject = new Rx.Subject()
-
-    fn.subject = subject
-
-    observers = [...observers, fn]
+    const subject = new Rx.BehaviorSubject()
 
     return (...params) => {
 
-      eventEmitter.emit({
-        type: fn,
-        params,
-      })
+      eventSubject.next({ params, subject, fn })
 
       return subject.first()
     }
@@ -113,6 +104,7 @@ const createSource = (
     type: SOURCE,
     connect: createConnect(currentState$),
     observe: stateObserver(currentState$),
+    getState: () => stateSubject.getValue(),
   }
 }
 

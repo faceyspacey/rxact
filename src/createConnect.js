@@ -30,13 +30,15 @@ const createConnect: CreateConnect = state$ => {
           streamState: {}
         }
 
+        subscription = null
+
         componentWillMount() {
           let stream$ = state$
           if (typeof observer === 'function') {
             stream$ = observer(stream$)
           }
 
-          stream$
+          this.subscription = stream$
             .subscribe((state) => {
               let nextState = state
 
@@ -46,6 +48,12 @@ const createConnect: CreateConnect = state$ => {
 
               this.setState({ streamState: nextState })
             })
+        }
+
+        componentWillUnMount() {
+          if (this.subscription && typeof this.subscription.unsubscribe === 'function') {
+            this.subscription.unsubscribe()
+          }
         }
 
         render() {

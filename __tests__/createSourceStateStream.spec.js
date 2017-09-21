@@ -9,6 +9,8 @@ describe('createSourceStateStream', () => {
     expect(stream.type).toEqual(SOURCE)
     expect(stream.createEvent).toBeDefined()
     expect(stream.connect).toBeDefined()
+    expect(stream.observe).toBeDefined()
+    expect(stream.getState).toBeDefined()
   })
 
   it('throw error if passing param is not a function for createEvent', () => {
@@ -31,6 +33,21 @@ describe('createSourceStateStream', () => {
     expect(() => {
       createSourceStateStream('stream', '').createEvent({})
     }).toThrow()
+  })
+
+  it('getState can get latest state of stream', () => {
+    const initialState = 0
+    const {
+      createEvent,
+      getState,
+    } = createSourceStateStream('source', initialState)
+    const emit = createEvent((event$, state) => event$.mapTo(state))
+
+    expect(getState()).toEqual(initialState)
+
+    emit(1)
+
+    expect(getState()).toEqual(1)
   })
 
   it('update state through event', () => {
@@ -87,7 +104,11 @@ describe('createSourceStateStream', () => {
 
   it('get stream return by event', (done) => {
     const initialState = 0
-    const { state$, createEvent } = createSourceStateStream('source', initialState)
+    const {
+      state$,
+      createEvent,
+      getState,
+    } = createSourceStateStream('source', initialState)
     const emit = createEvent((event$, state) => event$.mapTo(state))
     let index = 0
 
@@ -99,16 +120,19 @@ describe('createSourceStateStream', () => {
         expect(state).toEqual(1)
         index += 1
       } else if (index === 2) {
-        expect(state).toEqual(3)
+        expect(state).toEqual(5)
         index += 1
       } else if (index === 3) {
-        expect(state).toEqual(2)
+        expect(state).toEqual(6)
         done()
       }
     })
 
-    emit(1).delay(10).do(() => emit(2)).subscribe()
-    emit(3)
+    emit(1)
+      .delay(20)
+      .do(() => emit(getState() + 1))
+      .subscribe()
+    emit(5)
   })
 
   it('update state correctly in asynchronous way', (done) => {
