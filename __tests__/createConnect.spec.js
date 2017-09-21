@@ -1,4 +1,5 @@
 import React from 'react'
+import 'rxjs/add/operator/mapTo'
 import { shallow } from 'enzyme'
 import createConnect from '../src/createConnect'
 import { createSourceStateStream } from '../src/stateStream'
@@ -28,6 +29,37 @@ describe('createConnect', () => {
     expect(() =>
       createConnect(Symbol(''))
     ).toThrow()
+  })
+
+  it('set displayName', () => {
+    const source = createSourceStateStream('source', '')
+
+    const Component = () => (
+      <div>Test Component</div>
+    )
+
+    const Component2 = function component2() {
+      return <div>Test Component2</div>
+    }
+
+    class Component3 extends React.Component {
+      render() {
+        return (<div>Test Component3</div>)
+      }
+    }
+
+    class Component4 extends React.Component {
+      static displayName =  'comp4'
+
+      render() {
+        return (<div>Test Component3</div>)
+      }
+    }
+
+    expect(source.connect()(Component).displayName).toEqual('RxactConnected(Component)')
+    expect(source.connect()(Component2).displayName).toEqual('RxactConnected(component2)')
+    expect(source.connect()(Component3).displayName).toEqual('RxactConnected(Component3)')
+    expect(source.connect()(Component4).displayName).toEqual('RxactConnected(comp4)')
   })
 
   it('passes state to component', () => {

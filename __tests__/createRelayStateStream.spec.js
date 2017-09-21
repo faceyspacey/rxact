@@ -1,3 +1,6 @@
+import 'rxjs/add/operator/scan'
+import 'rxjs/add/operator/mapTo'
+
 import {
   createRelayStateStream, createSourceStateStream, RELAY
 } from '../src/stateStream'
