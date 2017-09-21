@@ -1,7 +1,8 @@
 <h1 align="center">Rxact</h1>
 
-[![CircleCI](https://circleci.com/gh/Darmody/rxact/tree/master.svg?style=svg)](https://circleci.com/gh/Darmody/rxact/tree/master)
 [![npm version](https://img.shields.io/npm/v/rxact.svg?style=flat-square)](https://www.npmjs.com/package/rxact)
+[![CircleCI master](https://img.shields.io/circleci/project/github/Darmody/rxact/master.svg?style=flat-square)](https://circleci.com/gh/Darmody/rxact/tree/master)
+[![Coveralls master](https://img.shields.io/coveralls/Darmody/rxact/master.svg?style=flat-square)](https://coveralls.io/github/Darmody/rxact?branch=master)
 
 Rxact is a Rxjs based state management for React.js app.
 
