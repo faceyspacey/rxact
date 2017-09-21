@@ -1,3 +1,8 @@
+import 'rxjs/add/operator/delay'
+import 'rxjs/add/operator/do'
+import 'rxjs/add/operator/skip'
+import 'rxjs/add/operator/mapTo'
+
 import { createSourceStateStream, SOURCE } from '../src/stateStream'
 
 describe('createSourceStateStream', () => {

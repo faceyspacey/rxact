@@ -17,10 +17,12 @@
     "lib",
     "src"
   ],
-  "dependencies": {
-    "react": "^15.6.1",
-    "react-dom": "^15.6.1",
+  "peerDependencies": {
     "rxjs": "^5.4.3"
+  },
+  "optionalDependencies": {
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -46,7 +48,10 @@
     "flow-bin": "^0.54.1",
     "jest": "^21.0.2",
     "jest-enzyme": "^3.8.2",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
     "react-test-renderer": "^15.6.1",
+    "rxjs": "^5.4.3",
     "webpack": "^3.5.6"
   },
   "jest": {
