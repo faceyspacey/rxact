@@ -148,4 +148,61 @@ describe('createSourceStateStream', () => {
     emitAsync(newState2)
     emit(newState)
   })
+
+  it('throw if observe is not a function, and not return Observable', () => {
+    expect(() => {
+      createSourceStateStream('source', '').observe(state$ => state$)
+    }).not.toThrow()
+
+    expect(() => {
+      createSourceStateStream('source', '').observe(() => {})
+    }).toThrow()
+
+    expect(() => {
+      createSourceStateStream('source', '').observe()
+    }).toThrow()
+
+    expect(() => {
+      createSourceStateStream('source', '').observe({})
+    }).toThrow()
+
+    expect(() => {
+      createSourceStateStream('source', '').observe('')
+    }).toThrow()
+
+    expect(() => {
+      createSourceStateStream('source', '').observe(1)
+    }).toThrow()
+  })
+
+  it('always can get current value whenever observing', () => {
+    const initialState = 0
+    const source = createSourceStateStream('source', initialState)
+    const newState = 1
+
+    source.observe(state$ => state$.first().do(state => {
+      expect(state).toEqual(initialState)
+    }))
+
+    source.createEvent(state$ => state$.mapTo(newState))()
+
+    source.observe(state$ => state$.do(state => {
+      expect(state).toEqual(newState)
+    }))
+  })
+
+  it('multiple subscribe will receive same state', () => {
+    const source = createSourceStateStream('source', 0)
+    const newState = 1
+
+    source.observe(state$ => state$.skip(1).do(state => {
+      expect(state).toEqual(newState)
+    }))
+
+    source.observe(state$ => state$.skip(1).do(state => {
+      expect(state).toEqual(newState)
+    }))
+
+    source.createEvent(state$ => state$.mapTo(newState))()
+  })
 })

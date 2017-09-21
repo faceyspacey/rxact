@@ -12,24 +12,37 @@ export interface StateStream {
   state$: Rx.Observable,
   type: StreamType,
   connect: Function,
+  observe: Function,
 }
 
 type SourceStateStream = StateStream & { type: 'SOURCE', createEvent: Function }
 type RelayStateStream = StateStream & { type: 'RELAY' }
 
+const stateObserver = state$ => observer => {
+  if (typeof observer !== 'function') {
+    throw new Error('Expected observer to be a function.')
+  }
+
+  const stream$ = observer(state$)
+
+  if (!(stream$ instanceof Rx.Observable)) {
+    throw new Error('Expected observer return an Observable instance.')
+  }
+
+  stream$.subscribe()
+}
+
 const createSource = (
   name: string,
   initialState?: any,
 ): SourceStateStream => {
-  const stateEmitter = createChangeEmitter()
   const eventEmitter = createChangeEmitter()
   let observers = []
 
-  const currentState$ = Rx.Observable.create((observer) => {
-    stateEmitter.listen(value => observer.next(value))
-  }).startWith(initialState)
+  const stateSource$ = Rx.Observable.create(() => {})
 
-  let currentState = initialState
+  const stateSubject = new Rx.BehaviorSubject(initialState)
+  const currentState$ = stateSource$.multicast(stateSubject).refCount()
 
   const event$ = Rx.Observable
     .create((observer) => {
@@ -37,12 +50,14 @@ const createSource = (
     })
     .mergeMap((event) => {
       const currentObserver = observers.find(observer => observer === event.type)
-      const currentEvent$ = Rx.Observable.of({ state: currentState })
+      const currentEvent$ = Rx.Observable.of({
+        state: stateSubject.getValue(),
+      })
 
       if (currentObserver) {
         return currentObserver(currentEvent$, ...event.params).map(state => ({
           state,
-          hookEmitter: currentObserver.hookEmitter,
+          subject: currentObserver.subject,
         }))
       }
 
@@ -52,19 +67,20 @@ const createSource = (
   event$.subscribe(event => {
     if (!event) { return }
 
-    const { state: updater, hookEmitter } = event
+    const { state: updater, subject } = event
 
     if (updater === undefined) { return }
 
     let nextState = updater
-    if (typeof updater === 'function') {
-      nextState = updater(currentState)
-    }
-    currentState = nextState
-    stateEmitter.emit(nextState)
 
-    if (hookEmitter) {
-      hookEmitter.emit({ state: nextState })
+    if (typeof updater === 'function') {
+      nextState = updater(stateSubject.getValue())
+    }
+
+    stateSubject.next(nextState)
+
+    if (subject) {
+      subject.next({ state: nextState })
     }
   })
 
@@ -73,12 +89,9 @@ const createSource = (
       throw new Error('Expected param of createEvent to be a function.')
     }
 
-    const hookEmitter = createChangeEmitter()
-    const hook$ = Rx.Observable.create((observer) => {
-      hookEmitter.listen(value => observer.next(value))
-    })
+    const subject = new Rx.Subject()
 
-    fn.hookEmitter = hookEmitter
+    fn.subject = subject
 
     observers = [...observers, fn]
 
@@ -89,10 +102,9 @@ const createSource = (
         params,
       })
 
-      return hook$.first()
+      return subject.first()
     }
   }
-
 
   return {
     name,
@@ -100,6 +112,7 @@ const createSource = (
     state$: currentState$,
     type: SOURCE,
     connect: createConnect(currentState$),
+    observe: stateObserver(currentState$),
   }
 }
 
@@ -140,6 +153,7 @@ const createRelay = (
     state$,
     type: RELAY,
     connect: createConnect(state$),
+    observe: stateObserver(state$),
   }
 }
 

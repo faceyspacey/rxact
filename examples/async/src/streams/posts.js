@@ -55,15 +55,16 @@ posts.fetchPosts = createEvent((event$) => event$
   })
 )
 
-posts.fetchPostsIfNeeded = () => posts.state$
+posts.fetchPostsIfNeeded = () => posts.observe(state$ => state$
   .distinctUntilChanged(stillFetching)
   .distinctUntilChanged(postsExist)
   .do(() => posts.inFetching(true))
   .switchMap(fetchPosts)
-  .subscribe((items) => {
+  .do((items) => {
     updatePosts(items)
       .subscribe(() => posts.inFetching(false))
   })
+)
 
 posts.updateReddit = createEvent((event$, reddit) => event$
   .pluck('state')
