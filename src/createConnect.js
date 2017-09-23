@@ -1,9 +1,9 @@
 // @flow
-import { Observable } from 'rxjs/Observable'
+import Rx from 'rxjs'
 import React, { PureComponent } from 'react'
 import type { ComponentType } from 'react'
 
-type Observer = Observable => Observable
+type Observer = Rx.Observable => Rx.Observable
 type Selector = (state: any) => any
 
 type State = {
@@ -13,7 +13,7 @@ type State = {
 type Props = {
 }
 
-type CreateConnect = (state$: Observable) => (
+type CreateConnect = (state$: Rx.Observable) => (
   selector?: Selector,
   observer?: Observer,
 ) => (WrappedComponent: ComponentType<any>) => ComponentType<any>
@@ -27,7 +27,7 @@ const setDisplayName = component => {
 }
 
 const createConnect: CreateConnect = state$ => {
-  if (!(state$ instanceof Observable)) {
+  if (!(state$ instanceof Rx.Observable)) {
     throw new Error('Expect state$ to be instance of Observable')
   }
 

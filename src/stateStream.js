@@ -1,14 +1,5 @@
 // @flow
-import 'rxjs/add/operator/map'
-import 'rxjs/add/observable/empty'
-import 'rxjs/add/observable/of'
-import 'rxjs/add/observable/combineLatest'
-import 'rxjs/add/operator/first'
-import 'rxjs/add/operator/mergeMap'
-import 'rxjs/add/operator/multicast'
-import { Observable } from 'rxjs/Observable'
-import { Subject } from 'rxjs/Subject'
-import { BehaviorSubject } from 'rxjs/BehaviorSubject'
+import Rx from 'rxjs'
 import createConnect from './createConnect'
 
 export const SOURCE = 'SOURCE'
@@ -17,7 +8,7 @@ export const RELAY = 'RELAY'
 type StreamType = 'SOURCE' | 'RELAY'
 export interface StateStream {
   name: string,
-  state$: Observable,
+  state$: Rx.Observable,
   type: StreamType,
   connect: Function,
   observe: Function,
@@ -34,7 +25,7 @@ const stateObserver = state$ => observer => {
 
   const stream$ = observer(state$)
 
-  if (!(stream$ instanceof Observable)) {
+  if (!(stream$ instanceof Rx.Observable)) {
     throw new Error('Expected observer return an Observable instance.')
   }
 
@@ -45,17 +36,17 @@ const createSource = (
   name: string,
   initialState?: any,
 ): SourceStateStream => {
-  const stateSource$ = Observable.create(() => {})
-  const stateSubject = new BehaviorSubject(initialState)
+  const stateSource$ = Rx.Observable.create(() => {})
+  const stateSubject = new Rx.BehaviorSubject(initialState)
   const currentState$ = stateSource$.multicast(stateSubject).refCount()
 
-  const eventSource$ = Observable.create(() => {})
-  const eventSubject = new Subject()
+  const eventSource$ = Rx.Observable.create(() => {})
+  const eventSubject = new Rx.Subject()
   const event$ = eventSource$.multicast(eventSubject).refCount()
 
   event$
     .mergeMap(({ fn, params, subject }) => {
-      const currentEvent$ = Observable.of({
+      const currentEvent$ = Rx.Observable.of({
         state: stateSubject.getValue(),
       })
 
@@ -66,7 +57,7 @@ const createSource = (
         }))
       }
 
-      return Observable.empty()
+      return Rx.Observable.empty()
     })
     .subscribe(event => {
       if (!event) { return }
@@ -96,7 +87,7 @@ const createSource = (
       throw new Error('Expected param of createEvent to be a function.')
     }
 
-    const subject = new BehaviorSubject()
+    const subject = new Rx.BehaviorSubject()
 
     return (...params) => {
 
@@ -139,7 +130,7 @@ const createRelay = (
   }
 
   const states$ = sources.map(source => source.state$)
-  const state$ = Observable.combineLatest(...states$, (...states) => {
+  const state$ = Rx.Observable.combineLatest(...states$, (...states) => {
     let state = {}
 
     sources.forEach((source, index) => {
