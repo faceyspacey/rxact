@@ -8,11 +8,11 @@ Rxact is a Rxjs based state management for React.js app.
 
 ## Examples
 
-* [Counter](https://darmody.github.io/rxact/examples/counter)
-* [TodoMVC](https://darmody.github.io/rxact/examples/todomvc)
-* [Async](https://darmody.github.io/rxact/examples/async)
+* [Counter](https://darmody.github.io/rxact-examples/counter)
+* [TodoMVC](https://darmody.github.io/rxact-examples/todomvc)
+* [Async](https://darmody.github.io/rxact-examples/async)
 
-Or checkout source code in examples directory.
+Or checkout source code in [rxact-examples](https://github.com/darmody/rxact-examples).
 
 ## License
 
