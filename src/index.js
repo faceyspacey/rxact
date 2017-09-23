@@ -3,9 +3,11 @@ import {
   createSourceStateStream,
   createRelayStateStream,
 } from './stateStream'
+import createConnect from './createConnect'
 
-export default {
+export {
   createStateStream,
   createSourceStateStream,
   createRelayStateStream,
+  createConnect,
 }
