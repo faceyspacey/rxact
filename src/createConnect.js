@@ -51,9 +51,9 @@ const createConnect: CreateConnect = state$ => {
           this.subscription = stream$
             .subscribe((state) => {
               let nextState = state
-
               if (typeof selector === 'function') {
-                nextState = selector(state, this.props || {})
+                // flow-ignore
+                nextState = selector(state, this.props)
               }
 
               this.setState({ streamState: nextState })

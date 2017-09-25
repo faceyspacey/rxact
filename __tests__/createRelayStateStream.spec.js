@@ -95,8 +95,8 @@ describe('createRelayStateStream', () => {
         }
       })
 
-    sourceA.createEvent((state$) => state$.mapTo('AA'))()
-    sourceB.createEvent((state$) => state$.mapTo('BB'))()
-    sourceC.createEvent((state$) => state$.mapTo('CC'))()
+    sourceA.emitState(() => 'AA')
+    sourceB.emitState(() => 'BB')
+    sourceC.emitState(() => 'CC')
   })
 })

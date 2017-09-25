@@ -1,6 +1,8 @@
 // @flow
 import Rx from 'rxjs'
-import createConnect from './createConnect'
+import createEventFactory from './createEventFactory'
+import emitStateFactory from './emitStateFactory'
+import createConnect from '../createConnect'
 
 export const SOURCE = 'SOURCE'
 export const RELAY = 'RELAY'
@@ -13,6 +15,7 @@ export interface StateStream {
   connect: Function,
   observe: Function,
   getState?: Function,
+  emitState?: Function,
 }
 
 type SourceStateStream = StateStream & { type: 'SOURCE', createEvent: Function }
@@ -40,71 +43,15 @@ const createSource = (
   const stateSubject = new Rx.BehaviorSubject(initialState)
   const currentState$ = stateSource$.multicast(stateSubject).refCount()
 
-  const eventSource$ = Rx.Observable.create(() => {})
-  const eventSubject = new Rx.Subject()
-  const event$ = eventSource$.multicast(eventSubject).refCount()
-
-  event$
-    .mergeMap(({ fn, params, subject }) => {
-      const currentEvent$ = Rx.Observable.of({
-        state: stateSubject.getValue(),
-      })
-
-      if (fn) {
-        return fn(currentEvent$, ...params).map(state => ({
-          state,
-          subject,
-        }))
-      }
-
-      return Rx.Observable.empty()
-    })
-    .subscribe(event => {
-      if (!event) { return }
-
-      const {
-        state: updater,
-        subject,
-      } = event
-
-      if (updater === undefined) { return }
-
-      let nextState = updater
-
-      if (typeof updater === 'function') {
-        nextState = updater(stateSubject.getValue())
-      }
-
-      stateSubject.next(nextState)
-
-      if (subject) {
-        subject.next()
-      }
-    })
-
-  const createEvent = fn => {
-    if (typeof fn !== 'function') {
-      throw new Error('Expected param of createEvent to be a function.')
-    }
-
-    const subject = new Rx.BehaviorSubject()
-
-    return (...params) => {
-
-      eventSubject.next({ params, subject, fn })
-
-      return subject.first()
-    }
-  }
-
   return {
     name,
-    createEvent,
+    createEvent: createEventFactory(stateSubject),
+    emitState: emitStateFactory(stateSubject),
+    getState: () => stateSubject.getValue(),
     state$: currentState$,
     type: SOURCE,
     connect: createConnect(currentState$),
     observe: stateObserver(currentState$),
-    getState: () => stateSubject.getValue(),
   }
 }
 
