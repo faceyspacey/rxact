@@ -53,7 +53,7 @@ const createConnect: CreateConnect = state$ => {
               let nextState = state
 
               if (typeof selector === 'function') {
-                nextState = selector(state)
+                nextState = selector(state, this.props || {})
               }
 
               this.setState({ streamState: nextState })
@@ -68,7 +68,7 @@ const createConnect: CreateConnect = state$ => {
 
         render() {
           return (
-            <WrappedComponent {...this.state.streamState} />
+            <WrappedComponent {...this.props} {...this.state.streamState} />
           )
         }
       }
