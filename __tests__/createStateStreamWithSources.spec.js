@@ -89,7 +89,7 @@ describe('createStateStream with sources', () => {
     sourceC.emitState(() => 'CC')
   })
 
-  it('observe all states when combining sources', () => {
+  it('observe all state when combining sources', () => {
     const stateA = { stateA: 'stateA' }
     const stateB = { stateB: 'stateB' }
     const stateC = { stateC: 'stateC' }
@@ -97,10 +97,9 @@ describe('createStateStream with sources', () => {
     const sourceB = createStateStream('sourceB', stateB)
     const sourceC = createStateStream('sourceC', stateC, [sourceA, sourceB])
 
-    sourceC.observe(state$ => state$
-      .do(state => {
+    sourceC.state$
+      .subscribe(state => {
         expect(state).toEqual({ sourceA: stateA, sourceB: stateB, sourceC: stateC })
       })
-    )
   })
 })

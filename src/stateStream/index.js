@@ -2,13 +2,12 @@
 import Rx from 'rxjs'
 import createEventFactory from './createEventFactory'
 import emitStateFactory from './emitStateFactory'
-import createConnect from '../createConnect'
+import createObserver from '../createObserver'
 
-export interface StateStream {
+export type StateStream = {
   name: string,
   state$: Rx.Observable,
-  connect: Function,
-  observe: Function,
+  observer: Function,
   getState?: Function,
   emitState?: Function,
 }
@@ -16,20 +15,6 @@ export interface StateStream {
 export type Source = {
   name: string,
   state$: Rx.Observable,
-}
-
-const stateObserver = state$ => observer => {
-  if (typeof observer !== 'function') {
-    throw new Error('Expected observer to be a function.')
-  }
-
-  const stream$ = observer(state$)
-
-  if (!(stream$ instanceof Rx.Observable)) {
-    throw new Error('Expected observer return an Observable instance.')
-  }
-
-  stream$.subscribe()
 }
 
 const combineSources = (currentState$, name, inputSources) => {
@@ -86,8 +71,7 @@ const createStateStream = (
     emitState: emitStateFactory(stateSubject),
     getState: () => stateSubject.getValue(),
     state$,
-    connect: createConnect(state$),
-    observe: stateObserver(state$),
+    observer: createObserver(state$),
   }
 }
 

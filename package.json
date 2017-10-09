@@ -18,9 +18,7 @@
     "src"
   ],
   "peerDependencies": {
-    "rxjs": "^5.4.3"
-  },
-  "optionalDependencies": {
+    "rxjs": "^5.4.3",
     "react": "^15.6.1",
     "react-dom": "^15.6.1"
   },
@@ -66,5 +64,8 @@
   },
   "moduleRoots": [
     "src"
-  ]
+  ],
+  "dependencies": {
+    "hoist-non-react-statics": "^2.3.1"
+  }
 }
