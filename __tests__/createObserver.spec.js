@@ -1,32 +1,32 @@
 import React from 'react'
 import { shallow } from 'enzyme'
-import createConnect from '../src/createConnect'
+import createObserver from '../src/createObserver'
 import createStateStream from '../src/stateStream'
 
-describe('createConnect', () => {
+describe('createObserver', () => {
   it('throw if state$ is not instance of Observable', () => {
     expect(() =>
-      createConnect(createStateStream('source').state$)
+      createObserver(createStateStream('source').state$)
     ).not.toThrow()
 
     expect(() =>
-      createConnect()
+      createObserver()
     ).toThrow()
 
     expect(() =>
-      createConnect('')
+      createObserver('')
     ).toThrow()
 
     expect(() =>
-      createConnect(1)
+      createObserver(1)
     ).toThrow()
 
     expect(() =>
-      createConnect({})
+      createObserver({})
     ).toThrow()
 
     expect(() =>
-      createConnect(Symbol(''))
+      createObserver(Symbol(''))
     ).toThrow()
   })
 
@@ -55,10 +55,10 @@ describe('createConnect', () => {
       }
     }
 
-    expect(source.connect()(Component).displayName).toEqual('RxactConnected(Component)')
-    expect(source.connect()(Component2).displayName).toEqual('RxactConnected(component2)')
-    expect(source.connect()(Component3).displayName).toEqual('RxactConnected(Component3)')
-    expect(source.connect()(Component4).displayName).toEqual('RxactConnected(comp4)')
+    expect(source.observer()(Component).displayName).toEqual('RxactObserver(Component)')
+    expect(source.observer()(Component2).displayName).toEqual('RxactObserver(component2)')
+    expect(source.observer()(Component3).displayName).toEqual('RxactObserver(Component3)')
+    expect(source.observer()(Component4).displayName).toEqual('RxactObserver(comp4)')
   })
 
   it('passes state to component', () => {
@@ -68,44 +68,50 @@ describe('createConnect', () => {
     const state = { state: 'state' }
     const source = createStateStream('source', state)
 
-    const Container = source.connect()(Component)
+    const Container = source.observer()(Component)
 
     const wrapper = shallow(<Container />)
 
     expect(wrapper.props()).toEqual(state)
   })
 
-  it('use obsever to change states', () => {
+  it('use mapStateToProps to select state', () => {
     const Component = () => (
       <div>Test Component</div>
     )
     const state = { stateA: 'stateA', stateB: 'stateB' }
     const source = createStateStream('source', state)
-    const observer = state$ => state$.mapTo({ stateC: 'stateC' })
+    const mapStateToProps = state => ({ stateB: state.stateB })
 
-    const Container = source.connect(null, observer)(Component)
-
-    const wrapper = shallow(<Container />)
-
-    expect(wrapper.props()).toEqual({ stateC: 'stateC' })
-  })
-
-  it('use selector to select states', () => {
-    const Component = () => (
-      <div>Test Component</div>
-    )
-    const state = { stateA: 'stateA', stateB: 'stateB' }
-    const source = createStateStream('source', state)
-    const selector = state => ({ stateB: state.stateB })
-
-    const Container = source.connect(selector)(Component)
+    const Container = source.observer(mapStateToProps)(Component)
 
     const wrapper = shallow(<Container />)
 
     expect(wrapper.props()).toEqual({ stateB: 'stateB' })
   })
 
-  it('connect all states when combining sources', () => {
+  it('use mergeProps to merge state and props', () => {
+    const Component = () => (
+      <div>Test Component</div>
+    )
+    const state = { stateA: 'stateA', stateB: 'stateB' }
+    const source = createStateStream('source', state)
+    const mergeProps = (state, props) => ({
+      stateA: state.stateA,
+      stateC: props.stateC,
+    })
+
+    const Container = source.observer(null, mergeProps)(Component)
+
+    const wrapper = shallow(<Container stateC="stateC" />)
+
+    expect(wrapper.props()).toEqual({
+      stateA: 'stateA',
+      stateC: 'stateC',
+    })
+  })
+
+  it('observe all state when combining sources', () => {
     const Component = () => (
       <div>Test Component</div>
     )
@@ -116,10 +122,26 @@ describe('createConnect', () => {
     const sourceB = createStateStream('sourceB', stateB)
     const sourceC = createStateStream('sourceC', stateC, [sourceA, sourceB])
 
-    const Container = sourceC.connect()(Component)
+    const Container = sourceC.observer()(Component)
 
     const wrapper = shallow(<Container />)
 
     expect(wrapper.props()).toEqual({ sourceA: stateA, sourceB: stateB, sourceC: stateC })
+  })
+
+  it('trigger rendering when receiving new state', () => {
+    const Component = () => (
+      <div>Test Component</div>
+    )
+    const source = createStateStream('source', { state: 'A' })
+
+    const Container = source.observer()(Component)
+    const wrapper = shallow(<Container />)
+
+    expect(wrapper.props()).toEqual({ state: 'A' })
+
+    source.emitState(() => ({ state: 'B' }))
+
+    expect(wrapper.props()).toEqual({ state: 'B' })
   })
 })

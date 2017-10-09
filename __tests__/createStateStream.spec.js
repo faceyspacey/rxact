@@ -38,8 +38,7 @@ describe('createStateStream', () => {
     expect(stream.state$).toBeDefined()
     expect(stream.createEvent).toBeDefined()
     expect(stream.emitState).toBeDefined()
-    expect(stream.connect).toBeDefined()
-    expect(stream.observe).toBeDefined()
+    expect(stream.observer).toBeDefined()
     expect(stream.getState).toBeDefined()
   })
 
@@ -161,60 +160,34 @@ describe('createStateStream', () => {
     })
   })
 
-  describe('observe', () => {
-    it('throw if observe is not a function, and not return Observable', () => {
-      expect(() => {
-        createStateStream('source', '').observe(state$ => state$)
-      }).not.toThrow()
-
-      expect(() => {
-        createStateStream('source', '').observe(() => {})
-      }).toThrow()
-
-      expect(() => {
-        createStateStream('source', '').observe()
-      }).toThrow()
-
-      expect(() => {
-        createStateStream('source', '').observe({})
-      }).toThrow()
-
-      expect(() => {
-        createStateStream('source', '').observe('')
-      }).toThrow()
-
-      expect(() => {
-        createStateStream('source', '').observe(1)
-      }).toThrow()
-    })
-
+  describe('state$', () => {
     it('always can get current value whenever observing', () => {
       const initialState = 0
       const source = createStateStream('source', initialState)
       const newState = 1
 
-      source.observe(state$ => state$.first().do(state => {
+      source.state$.first().do(state => {
         expect(state).toEqual(initialState)
-      }))
+      }).subscribe()
 
       source.emitState(() => newState)
 
-      source.observe(state$ => state$.do(state => {
+      source.state$.do(state => {
         expect(state).toEqual(newState)
-      }))
+      }).subscribe()
     })
 
     it('multiple subscribe will receive same state', () => {
       const source = createStateStream('source', 0)
       const newState = 1
 
-      source.observe(state$ => state$.skip(1).do(state => {
+      source.state$.skip(1).do(state => {
         expect(state).toEqual(newState)
-      }))
+      }).subscribe()
 
-      source.observe(state$ => state$.skip(1).do(state => {
+      source.state$.skip(1).do(state => {
         expect(state).toEqual(newState)
-      }))
+      }).subscribe()
 
       source.emitState(() => newState)
     })
