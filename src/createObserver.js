@@ -82,7 +82,7 @@ const createObserver: CreateObserver = state$ => {
           this.setProps(this.props)
         }
 
-        componentWillUnMount() {
+        componentWillUnmount() {
           if (this.subscription && typeof this.subscription.unsubscribe === 'function') {
             this.subscription.unsubscribe()
             this.subscription = null
