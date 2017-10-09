@@ -1,7 +1,7 @@
 import createStateStream from './stateStream'
-import createConnect from './createConnect'
+import createObserver from './createObserver'
 
 export {
   createStateStream,
-  createConnect,
+  createObserver,
 }
