@@ -1,6 +1,7 @@
+// @flow
 import Rx from 'rxjs'
 
-const emitStateFactory = (stateSubject) => {
+const emitStateFactory = (stateSubject: Rx.Subject) => {
   const subject = new Rx.Subject()
 
   subject.subscribe({
@@ -10,7 +11,7 @@ const emitStateFactory = (stateSubject) => {
     }
   })
 
-  const emitState = (updater) => {
+  const emitState = (updater: Function) => {
     if (typeof updater !== 'function') {
       throw new Error('Expected passing a function to emitState.')
     }
