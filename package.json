@@ -23,8 +23,8 @@
   "private": false,
   "scripts": {
     "build": "yarn build:lib && yarn build:es && yarn build:umd && yarn build:umd:min",
-    "build:lib": "babel src --out-dir lib --ignore __tests__",
-    "build:es": "cross-env BABEL_ENV=es babel src --out-dir es --ignore __tests__",
+    "build:lib": "NODE_ENV=production BABEL_ENV=lib babel src --out-dir lib --ignore __tests__",
+    "build:es": "cross-env NODE_ENV=production BABEL_ENV=es babel src --out-dir es --ignore __tests__",
     "build:umd": "cross-env NODE_ENV=development webpack src/index.js dist/rxact.js",
     "build:umd:min": "cross-env NODE_ENV=production webpack src/index.js dist/rxact.min.js",
     "clean": "rimraf dist lib es",
@@ -41,9 +41,9 @@
     "dist"
   ],
   "peerDependencies": {
-    "react": "^15.6.1",
-    "react-dom": "^15.6.1",
-    "rxjs": "^5.4.3"
+    "react": "^0.14.0 || ^15.0.0 || ^16",
+    "react-dom": "^0.14.0 || ^15.0.0 || ^16",
+    "rxjs": "^5.0.0"
   },
   "dependencies": {
     "hoist-non-react-statics": "^2.3.1"

@@ -1,6 +1,6 @@
 {
   "presets": [
-    "env",
+    ["env", { "modules": false }],
     "react",
     "flow"
   ],
@@ -20,6 +20,24 @@
     "production": {
       "plugins": [
         "transform-es2015-modules-commonjs",
+        "transform-object-rest-spread",
+        "transform-class-properties"
+      ]
+    },
+    "lib": {
+      "presets": [
+        "env",
+        "react",
+        "flow"
+      ],
+      "plugins": [
+        "transform-es2015-modules-commonjs",
+        "transform-object-rest-spread",
+        "transform-class-properties"
+      ]
+    },
+    "es": {
+      "plugins": [
         "transform-object-rest-spread",
         "transform-class-properties"
       ]

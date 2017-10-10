@@ -48,7 +48,11 @@ const config = {
     library: 'rxcat',
     libraryTarget: 'umd',
   },
-  plugins: [],
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(env)
+    }),
+  ],
 }
 
 if (env === 'production') {
