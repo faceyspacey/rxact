@@ -10,30 +10,14 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
-          - v1-dependencies-
+          - yarn-{{ arch }}-{{ .Branch }}-{{ checksum "package.json" }}
       - run: yarn install
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
-      - run:
-          name: lint
-          command: yarn run lint
-      - run:
-          name: flow-type-check
-          command: yarn run flow
-      - run:
-          name: test
-          command: yarn test
-      - run:
-          name: code-coverage
-          command: yarn run coverage
-      - store_artifacts:
-          path: test-results.xml
-          prefix: tests
-      - store_artifacts:
-          path: coverage
-          prefix: coverage
-      - store_test_results:
-          path: test-results.xml
+          key: yarn-{{ arch }}-{{ .Branch }}-{{ checksum "package.json" }}
+      - run: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+      - run: chmod +x ./cc-test-reporter
+      - run: ./cc-test-reporter before-build
+      - run: yarn run coverage
+      - run: ./cc-test-reporter after-build -t lcov --exit-code $?
