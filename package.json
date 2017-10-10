@@ -1,6 +1,6 @@
 {
   "name": "rxact",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "a Rxjs based state management for React.js app",
   "keywords": [
    "react",
@@ -17,6 +17,9 @@
   "repository": "git@github.com:Darmody/rxact.git",
   "author": "Darmody <eterlf41@gmail.com>",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Darmody/rxact/issues"
+  },
   "private": false,
   "scripts": {
     "build": "yarn build:lib && yarn build:es && yarn build:umd && yarn build:umd:min",
