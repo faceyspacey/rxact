@@ -1,26 +1,52 @@
 {
   "name": "rxact",
-  "version": "0.6.1",
-  "main": "lib/index.js",
+  "version": "0.7.0",
+  "description": "a Rxjs based state management for React.js app",
+  "keywords": [
+   "react",
+   "reactjs",
+   "rxjs",
+   "reactiveX",
+   "rxact",
+   "state",
+   "stream"
+ ],
+  "main": "./lib/index.js",
+  "module": "./es/index.js",
+  "jsnext:main": "./es/index.js",
   "repository": "git@github.com:Darmody/rxact.git",
   "author": "Darmody <eterlf41@gmail.com>",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Darmody/rxact/issues"
+  },
   "private": false,
   "scripts": {
-    "build": "./bin/build",
-    "lint": "./node_modules/.bin/eslint src",
-    "flow": "./node_modules/.bin/flow",
-    "test": "./node_modules/.bin/jest",
-    "coverage": "./node_modules/.bin/jest --coverage"
+    "build": "yarn build:lib && yarn build:es && yarn build:umd && yarn build:umd:min",
+    "build:lib": "babel src --out-dir lib --ignore __tests__",
+    "build:es": "cross-env BABEL_ENV=es babel src --out-dir es --ignore __tests__",
+    "build:umd": "cross-env NODE_ENV=development webpack src/index.js dist/rxact.js",
+    "build:umd:min": "cross-env NODE_ENV=production webpack src/index.js dist/rxact.min.js",
+    "clean": "rimraf dist lib es",
+    "prepublish": "yarn lint && yarn test && yarn flow && yarn clean && yarn build",
+    "lint": "eslint src",
+    "flow": "flow check",
+    "test": "jest",
+    "coverage": "jest --coverage"
   },
   "files": [
+    "README.md",
+    "es",
     "lib",
-    "src"
+    "dist"
   ],
   "peerDependencies": {
-    "rxjs": "^5.4.3",
     "react": "^15.6.1",
-    "react-dom": "^15.6.1"
+    "react-dom": "^15.6.1",
+    "rxjs": "^5.4.3"
+  },
+  "dependencies": {
+    "hoist-non-react-statics": "^2.3.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -35,6 +61,7 @@
     "babel-preset-env": "^1.6.0",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-react": "^6.24.1",
+    "cross-env": "^5.0.5",
     "enzyme": "^2.9.1",
     "eslint": "^4.6.1",
     "eslint-import-resolver-webpack": "^0.8.3",
@@ -49,6 +76,7 @@
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-test-renderer": "^15.6.1",
+    "rimraf": "^2.6.2",
     "rxjs": "^5.4.3",
     "webpack": "^3.5.6"
   },
@@ -65,7 +93,13 @@
   "moduleRoots": [
     "src"
   ],
-  "dependencies": {
-    "hoist-non-react-statics": "^2.3.1"
-  }
+  "npmName": "rxact",
+  "npmFileMap": [
+    {
+      "basePath": "/dist/",
+      "files": [
+        "*.js"
+      ]
+    }
+  ]
 }
