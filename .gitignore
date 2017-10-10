@@ -27,6 +27,8 @@ coverage
 build/Release
 build
 lib
+dist
+es
 
 # Dependency directories
 node_modules/

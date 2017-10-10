@@ -1,7 +1,28 @@
+const webpack = require('webpack')
 const path = require('path')
 const srcPath = path.resolve(__dirname, 'src')
 
-module.exports = {
+const env = process.env.NODE_ENV
+
+const reactExternal = {
+  root: 'React',
+  commonjs2: 'react',
+  commonjs: 'react',
+  amd: 'react'
+}
+
+const rxjsExternal = {
+  root: 'Rxjs',
+  commonjs2: 'rxjs',
+  commonjs: 'rxjs',
+  amd: 'rxjs'
+}
+
+const config = {
+  externals: {
+    react: reactExternal,
+    rxjs: rxjsExternal,
+  },
   entry: './src/index.js',
   resolve: {
     modules: [
@@ -19,12 +40,6 @@ module.exports = {
             cacheDirectory: true,
           },
         },
-        {
-          loader: 'eslint-loader',
-          options: {
-            failOnError: false,
-          }
-        },
       ],
       include: srcPath,
     }],
@@ -33,4 +48,20 @@ module.exports = {
     library: 'rxcat',
     libraryTarget: 'umd',
   },
+  plugins: [],
 }
+
+if (env === 'production') {
+  config.plugins.push(
+    new webpack.optimize.UglifyJsPlugin({
+      compressor: {
+        pure_getters: true,
+        unsafe: true,
+        unsafe_comps: true,
+        warnings: false
+      }
+    })
+  )
+}
+
+module.exports = config
