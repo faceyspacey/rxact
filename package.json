@@ -1,6 +1,6 @@
 {
   "name": "rxact",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "a Rxjs based state management for React.js app",
   "keywords": [
    "react",
@@ -41,9 +41,9 @@
     "dist"
   ],
   "peerDependencies": {
-    "react": "^15.6.1",
-    "react-dom": "^15.6.1",
-    "rxjs": "^5.4.3"
+    "react": "^0.14.0 || ^15.0.0 || ^16",
+    "react-dom": "^0.14.0 || ^15.0.0 || ^16",
+    "rxjs": "^5.0.0"
   },
   "dependencies": {
     "hoist-non-react-statics": "^2.3.1"
