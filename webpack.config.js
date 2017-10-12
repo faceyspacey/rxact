@@ -11,17 +11,9 @@ const reactExternal = {
   amd: 'react'
 }
 
-const rxjsExternal = {
-  root: 'Rxjs',
-  commonjs2: 'rxjs',
-  commonjs: 'rxjs',
-  amd: 'rxjs'
-}
-
 const config = {
   externals: {
     react: reactExternal,
-    rxjs: rxjsExternal,
   },
   entry: './src/index.js',
   resolve: {
