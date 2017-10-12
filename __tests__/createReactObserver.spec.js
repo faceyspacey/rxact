@@ -4,7 +4,7 @@ import { shallow } from 'enzyme'
 import setup from '../src/setup'
 import teardown from '../src/teardown'
 import createReactObserver from '../src/createReactObserver'
-import StateStream from '../src/StateStream'
+import StateStream from '../src/stateStream'
 
 describe('createReactObserver', () => {
   beforeAll(() => {
