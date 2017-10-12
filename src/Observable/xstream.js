@@ -16,9 +16,11 @@ export default class XStreamObservable {
 
     XStream.xsSubscribe = XStream.subscribe
     XStream.subscribe = function subscribe(onNext, onError, onComplete) {
-      let listener = {}
+      let listener
 
-      if (typeof onNext.next === 'function') {
+      if (!onNext) {
+        listener = {}
+      } else if (typeof onNext.next === 'function') {
         listener = onNext
       } else {
         listener = {
