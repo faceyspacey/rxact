@@ -1,11 +1,11 @@
 import StateStream from './StateStream'
-import createObserver from './createObserver'
+import createReactObserver from './createReactObserver'
 import setup from './setup'
 import teardown from './teardown'
 
 export {
   StateStream,
-  createObserver,
+  createReactObserver,
   setup,
   teardown,
 }
