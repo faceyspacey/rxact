@@ -5,7 +5,7 @@
 [![Coverage](https://codeclimate.com/github/Darmody/rxact/badges/coverage.svg)](https://codeclimate.com/github/Darmody/rxact)
 [![Code Climate](https://codeclimate.com/github/Darmody/rxact/badges/gpa.svg)](https://codeclimate.com/github/Darmody/rxact)
 
-Rxact is a Rxjs based state management for React.js app.
+Rxact is an observable state management for React.js app.
 
 ## Examples
 

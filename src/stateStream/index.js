@@ -1,78 +1,88 @@
 // @flow
-import Rx from 'rxjs'
-import createEventFactory from './createEventFactory'
-import emitStateFactory from './emitStateFactory'
-import createObserver from '../createObserver'
+import type { ComponentType } from 'react'
+import type {
+  ESObservable, IESObservable, Subscription, SubscriptionObserver,
+} from '../Observable'
+import { getObservable } from '../Observable'
+import stateFactory from './stateFactory'
+import combineStateStreams from './combineStateSteams'
+import createReactObserver from '../createReactObserver'
 
-export type StateStream = {
-  name: string,
-  state$: Rx.Observable,
-  observer: Function,
-  getState?: Function,
-  emitState?: Function,
+export interface IStateStream {
+  constructor(name: string, initialState: any): void,
+
+  name: ?string,
+
+  Observable: ESObservable,
+
+  state$: ?IESObservable,
+
+  subscriptions: Array<Subscription>,
+
+  observers: Array<SubscriptionObserver>,
+
+  reactObserver: Function,
+
+  next(updater: Function): void,
+
+  getState(): any,
+
+  dispose(): void,
 }
 
-export type Source = {
-  name: string,
-  state$: Rx.Observable,
+const defaultNext = () => {
+  if (process.env.NODE_ENV !== 'test') {
+    console.warn('You are calling next on a disposed StateStream.')
+  }
 }
 
-const combineSources = (currentState$, name, inputSources) => {
-  let state$ = currentState$
+export type StateStreams = Array<StateStream>
 
-  if (inputSources && inputSources.length > 0) {
-    const sourceNames = {}
-    inputSources.forEach((source) => {
-      if (typeof source !== 'object' || !source.name || !source.state$) {
-        throw new Error('Expected the source to be type of StateStream.')
-      }
-
-      sourceNames[source.name] = 1
-    })
-
-    if (Object.keys(sourceNames).length !== inputSources.length) {
-      throw new Error('Sources\' name should be unique.')
+export default class StateStream implements IStateStream {
+  constructor(name: string, initialState: any, stateStreams?: StateStreams) {
+    if (typeof name !== 'string' || !name) {
+      throw new Error('Expected the name to be a not none string.')
     }
 
-    const sources = [...inputSources, { name, state$: currentState$ }]
-    const states$ = sources.map(source => source.state$)
-    state$ = Rx.Observable.combineLatest(...states$, (...states) => {
-      let state = {}
+    this.name = name
+    this.Observable = getObservable()
 
-      sources.forEach((source, index) => {
-        state[source.name] = states[index]
-      })
+    this.state$ = stateFactory.call(this, initialState, defaultNext)
+    this.state$ = combineStateStreams.call(this, this.state$, name, stateStreams)
+    const {
+      decorator: reactObserver,
+      subscription: streamSubscription
+    } = createReactObserver(this.state$)
 
-      return state
+    this.reactObserver = reactObserver
+    this.subscriptions.push(streamSubscription)
+  }
+
+  name = null
+
+  Observable = getObservable()
+
+  state$ = null
+
+  subscriptions = []
+
+  observers = []
+
+  next = defaultNext
+
+  reactObserver = (component: ComponentType<any>) => component
+
+  getState = () => {
+    throw new Error('StateStream is invalid.')
+  }
+
+  dispose = () => {
+    this.subscriptions.forEach(subscription => {
+      subscription.unsubscribe()
+    })
+
+    this.observers.forEach(observer => {
+      observer.complete()
     })
   }
-
-  return state$
 }
-
-const createStateStream = (
-  name: string,
-  initialState?: any,
-  sources: Array<Source>,
-): StateStream => {
-  if (typeof name !== 'string' || !name) {
-    throw new Error('Expected the name to be a not none string.')
-  }
-
-  const stateSource$ = Rx.Observable.create(() => {})
-  const stateSubject = new Rx.BehaviorSubject(initialState)
-  const currentState$ = stateSource$.multicast(stateSubject).refCount()
-
-  const state$ = combineSources(currentState$, name, sources)
-
-  return {
-    name,
-    createEvent: createEventFactory(stateSubject),
-    emitState: emitStateFactory(stateSubject),
-    getState: () => stateSubject.getValue(),
-    state$,
-    observer: createObserver(state$),
-  }
-}
-
-export default createStateStream
