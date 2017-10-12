@@ -1,6 +1,6 @@
 import setup from '../../src/setup'
 import teardown from '../../src/teardown'
-import StateStream from '../../src/StateStream'
+import StateStream from '../../src/stateStream'
 
 export default (Observable) => {
   beforeEach(() => {
