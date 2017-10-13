@@ -1,4 +1,5 @@
 import { getObservable, setObservable, cleanObservable } from '../../src/Observable'
+import isObservable from '../../src/utils/isObservable'
 import teardown from '../../src/teardown'
 
 export default (Observable) => {
@@ -29,6 +30,69 @@ export default (Observable) => {
       expect(() => {
         setObservable(Observable)
       }).not.toThrow()
+    })
+
+    describe('Observable implement', () => {
+      it('exposes the public API', () => {
+        const observable = new Observable(() => {})
+
+        expect(isObservable(observable)).toBeTruthy()
+        expect(observable.subscribe).toBeDefined()
+      })
+
+      it('exposes the static API', () => {
+        expect(Observable.of).toBeDefined()
+        expect(Observable.from).toBeDefined()
+      })
+
+      it('construct with SubscriptionObserver', () => {
+        const observable = new Observable(observer => {
+          observer.next(0)
+
+          return {
+            unsubscribe: () => {}
+          }
+        })
+        const mockSubscriber = jest.fn()
+
+        observable.subscribe(mockSubscriber)
+
+        expect(mockSubscriber.mock.calls).toEqual([[0]])
+      })
+
+      it('subscribe() with observer', () => {
+        const observable = new Observable(observer => {
+          observer.next(0)
+
+          return {
+            unsubscribe: () => {}
+          }
+        })
+        const mockSubscriber = jest.fn()
+
+        const observer = {
+          next: mockSubscriber
+        }
+
+        observable.subscribe(observer)
+
+        expect(mockSubscriber.mock.calls).toEqual([[0]])
+      })
+
+      it('subscribe() with onNext, onComplete, onError', () => {
+        const observable = new Observable(observer => {
+          observer.next(0)
+
+          return {
+            unsubscribe: () => {}
+          }
+        })
+        const mockSubscriber = jest.fn()
+
+        observable.subscribe(mockSubscriber)
+
+        expect(mockSubscriber.mock.calls).toEqual([[0]])
+      })
     })
   })
 }

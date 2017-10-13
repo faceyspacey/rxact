@@ -63,13 +63,13 @@ export interface IESObservable {
               onComplete?: Function): Subscription,
 
     // Returns itself
-    [$$observable]: () => ESObservable,
+    [$$observable]: () => IESObservable,
 
     // Converts items to an Observable
-    static of(...items: Array<any>): ESObservable,
+    static of(...items: Array<any>): IESObservable,
 
     // Converts an observable or iterable to an Observable
-    static from(observable: ESObservable | Iterable<any>): ESObservable,
+    static from(observable: ESObservable | Iterable<any>): IESObservable,
 }
 
 let Observable: ?ESObservable = null

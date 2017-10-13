@@ -7,6 +7,7 @@ import { getObservable } from '../Observable'
 import stateFactory from './stateFactory'
 import combineStateStreams from './combineStateSteams'
 import createReactObserver from '../createReactObserver'
+import eventStreamFactory from './eventStreamFactory'
 
 export interface IStateStream {
   constructor(name: string, initialState: any): void,
@@ -27,12 +28,14 @@ export interface IStateStream {
 
   getState(): any,
 
+  createEventStream: Function,
+
   dispose(): void,
 }
 
-const defaultNext = () => {
+const defaultFn = () => {
   if (process.env.NODE_ENV !== 'test') {
-    console.warn('You are calling next on a disposed StateStream.')
+    console.warn('You are calling function on a disposed StateStream.')
   }
 }
 
@@ -47,7 +50,7 @@ export default class StateStream implements IStateStream {
     this.name = name
     this.Observable = getObservable()
 
-    this.state$ = stateFactory.call(this, initialState, defaultNext)
+    this.state$ = stateFactory.call(this, initialState, defaultFn)
     this.state$ = combineStateStreams.call(this, this.state$, name, stateStreams)
     const {
       decorator: reactObserver,
@@ -56,6 +59,7 @@ export default class StateStream implements IStateStream {
 
     this.reactObserver = reactObserver
     this.subscriptions.push(streamSubscription)
+    this.createEventStream = eventStreamFactory(this.Observable, this.getState)
   }
 
   name = null
@@ -68,13 +72,15 @@ export default class StateStream implements IStateStream {
 
   observers = []
 
-  next = defaultNext
+  next = defaultFn
 
   reactObserver = (component: ComponentType<any>) => component
 
   getState = () => {
     throw new Error('StateStream is invalid.')
   }
+
+  createEventStream = defaultFn
 
   dispose = () => {
     this.subscriptions.forEach(subscription => {
