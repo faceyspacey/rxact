@@ -46,9 +46,33 @@ const eventRunnerFactory: EventRunnerFactory = (Observable, getState) => {
       )
     }
 
-    outputSource$.subscribe(() => {})
+    let output
+    let next
+    let subscription
 
-    return outputSource$
+    const stream$ = new Observable(observer => {
+      if (output !== undefined) {
+        observer.next(output)
+      }
+
+      next = value => observer.next(value)
+
+      return {
+        unsubscribe: () => {
+          subscription.unsubscribe()
+        }
+      }
+    })
+
+    subscription = outputSource$.subscribe((value) => {
+      if (typeof next === 'function') {
+        next(value)
+      }
+
+      output = value
+    })
+
+    return stream$
   }
 
   return eventRunner

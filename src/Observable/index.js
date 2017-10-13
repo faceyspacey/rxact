@@ -69,7 +69,7 @@ export interface IESObservable {
     static of(...items: Array<any>): IESObservable,
 
     // Converts an observable or iterable to an Observable
-    static from(observable: ESObservable | Iterable<any>): IESObservable,
+    static from(observable: IESObservable | Iterable<any>): IESObservable,
 }
 
 let Observable: ?ESObservable = null
