@@ -1,6 +1,6 @@
 {
   "name": "rxact",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "an observable state management for React.js app",
   "keywords": [
     "observable",
