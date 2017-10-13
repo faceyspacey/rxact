@@ -1,6 +1,6 @@
 import Observable from 'zen-observable'
 import stateSteamExample from '../shared/StateStream.example'
 
-describe('xstream', () => {
+describe('zen-observable', () => {
   stateSteamExample(Observable)
 })

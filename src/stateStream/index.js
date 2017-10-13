@@ -7,7 +7,7 @@ import { getObservable } from '../Observable'
 import stateFactory from './stateFactory'
 import combineStateStreams from './combineStateSteams'
 import createReactObserver from '../createReactObserver'
-import eventStreamFactory from './eventStreamFactory'
+import eventRunnerFactory from './eventRunnerFactory'
 
 export interface IStateStream {
   constructor(name: string, initialState: any): void,
@@ -28,7 +28,7 @@ export interface IStateStream {
 
   getState(): any,
 
-  createEventStream: Function,
+  eventRunner: Function,
 
   dispose(): void,
 }
@@ -59,7 +59,7 @@ export default class StateStream implements IStateStream {
 
     this.reactObserver = reactObserver
     this.subscriptions.push(streamSubscription)
-    this.createEventStream = eventStreamFactory(this.Observable, this.getState)
+    this.eventRunner = eventRunnerFactory(this.Observable, this.getState)
   }
 
   name = null
@@ -80,7 +80,7 @@ export default class StateStream implements IStateStream {
     throw new Error('StateStream is invalid.')
   }
 
-  createEventStream = defaultFn
+  eventRunner = defaultFn
 
   dispose = () => {
     this.subscriptions.forEach(subscription => {
