@@ -93,7 +93,11 @@
       "src"
     ],
     "testMatch": [
-      "**/__tests__/**/?(*.)(spec|test).js?(x)"
+      "**/__tests__/**/?(*.)(spec|test).js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/__tests__/"
     ]
   },
   "moduleRoots": [

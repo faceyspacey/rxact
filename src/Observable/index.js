@@ -35,9 +35,9 @@ interface IObserver {
     complete(): void,
 }
 
-type Observer = IObserver
+export type Observer = IObserver
 
-type SubscriberFunction = (observer: SubscriptionObserver) =>
+export type SubscriberFunction = (observer: SubscriptionObserver) =>
   (void => void) | Subscription
 
 interface ISubscription {

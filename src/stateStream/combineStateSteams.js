@@ -29,8 +29,9 @@ function combineStateStreams(
 
     // $flow-ignore
     const subscriptions = sources.map((source) => source.state$.subscribe((state) => {
-      const sourceName = source.name || ''
+      const sourceName = source.name
 
+      // $flow-ignore
       const nextState = { ...currentState, [sourceName]: state }
       currentState = nextState
 
@@ -41,10 +42,12 @@ function combineStateStreams(
 
     this.subscriptions = this.subscriptions.concat(subscriptions)
 
-    return () => {
-      subscriptions.forEach((subscription) => {
-        subscription.unsubscribe()
-      })
+    return {
+      unsubscribe: () => {
+        subscriptions.forEach((subscription) => {
+          subscription.unsubscribe()
+        })
+      }
     }
   })
 

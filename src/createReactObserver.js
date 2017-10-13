@@ -5,6 +5,7 @@ import type { ComponentType } from 'react'
 import type { Subscription, IESObservable } from './Observable'
 import { getObservable } from './Observable'
 import isObservable from './utils/isObservable'
+import noop from './utils/noop'
 
 export type MapStateToProps = (stateProps: any, ownProps: {}) => any
 export type MergeProps = (stateProps: any, ownProps: {}) => any
@@ -13,8 +14,7 @@ type State = {
   component: any,
 }
 
-type Props = {
-}
+type Props = any
 
 type Decorator = (
   mapStateToProps?: MapStateToProps, mergeProps?: MergeProps,
@@ -51,21 +51,27 @@ const createReactObserver: CreateReactObserver = (state$) => {
       class Observer extends Component<Props, State> {
         static displayName = setDisplayName(WrappedComponent)
 
+        constructor(props) {
+          super(props)
+
+          this.props$ = new Observable(observer => {
+            this.setProps = props => observer.next(props)
+
+            this.setProps(this.props)
+
+            return {
+              unsubscribe: () => {
+                this.setProps = noop
+              }
+            }
+          })
+        }
+
         subscription = null
 
-        setProps = fn => fn
+        setProps = noop
 
-        props$ = new Observable(observer => {
-          this.setProps = props => observer.next(props)
-
-          this.setProps(this.props)
-
-          return {
-            unsubscribe: () => {
-              this.setProps = fn => fn
-            }
-          }
-        })
+        props$ = noop
 
         state = {
           component: null,
@@ -80,10 +86,7 @@ const createReactObserver: CreateReactObserver = (state$) => {
             let readyCount = 0
             let streamState
             let propState
-
-            const propSubscription = this.props$.subscribe((state) => {
-              propState = state
-
+            const onSubscribe = () => {
               if (readyCount < 2) {
                 readyCount += 1
               }
@@ -103,30 +106,17 @@ const createReactObserver: CreateReactObserver = (state$) => {
                 observer.next(nextVdom)
 
               }
+            }
+
+            const propSubscription = this.props$.subscribe((state) => {
+              propState = state
+              onSubscribe()
+
             })
             streamSubscription = stream$.subscribe((state) => {
 
               streamState = state
-
-              if (readyCount < 2) {
-                readyCount += 1
-              }
-
-              if (readyCount > 1) {
-                let nextState = streamState
-
-                if (typeof mapStateToProps === 'function') {
-                  nextState = mapStateToProps(streamState, propState)
-                }
-
-                const componentProps = mergeProps(nextState, propState)
-
-                const nextVdom = (
-                  <WrappedComponent {...componentProps} />
-                )
-                observer.next(nextVdom)
-
-              }
+              onSubscribe()
             })
 
             return {
@@ -138,10 +128,8 @@ const createReactObserver: CreateReactObserver = (state$) => {
           })
 
           this.subscription = vdom$.subscribe(component => {
-            if (component !== this.component) {
-              this.component = component
-              this.forceUpdate()
-            }
+            this.component = component
+            this.forceUpdate()
           })
         }
 

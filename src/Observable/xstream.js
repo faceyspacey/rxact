@@ -1,19 +1,18 @@
+// @flow
 import { MemoryStream, Stream } from 'xstream'
-import noop from '../utils/noop'
+import type { SubscriberFunction } from './'
 
 Stream.prototype._xsSubscribe = Stream.prototype.subscribe
 Stream.prototype.subscribe = function subscribe(onNext, onError, onComplete) {
   let listener
 
-  if (!onNext) {
-    listener = {}
-  } else if (typeof onNext.next === 'function') {
+  if (onNext && typeof onNext.next === 'function') {
     listener = onNext
   } else {
     listener = {
-      next: onNext || noop,
-      error: onError || noop,
-      complete: onComplete || noop,
+      next: onNext,
+      error: onError,
+      complete: onComplete,
     }
   }
 
@@ -22,29 +21,33 @@ Stream.prototype.subscribe = function subscribe(onNext, onError, onComplete) {
 
 // https://github.com/staltz/xstream/blob/master/src/index.ts#L85-L93
 function internalizeProducer(producer) {
-  producer._start = function _start(il) {
-    il.next = il._n
-    il.error = il._e
-    il.complete = il._c
-    this.start(il)
+  return {
+    ...producer,
+    _start: function _start(il) {
+      il.next = il._n
+      il.error = il._e
+      il.complete = il._c
+      producer.start(il)
+    },
+    _stop: producer.stop
+
   }
-  producer._stop = producer.stop
 }
 
 export default class XStreamObservable extends MemoryStream {
-  constructor(observer) {
+  constructor(subscriber: SubscriberFunction) {
+    let subscription = null
     const producer = {
-      subscription: null,
       start: (listener) => {
-        this.subscription = observer(listener)
+        subscription = subscriber(listener)
       },
       stop: () => {
-        this.subscription.unsubscribe()
+        if (subscription) {
+          subscription.unsubscribe()
+        }
       },
     }
 
-    internalizeProducer(producer)
-
-    super(producer)
+    super(internalizeProducer(producer))
   }
 }

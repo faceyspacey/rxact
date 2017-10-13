@@ -248,10 +248,48 @@ export default (Observable) => {
 
         expect(mockListener.mock.calls.length).toEqual(1)
       })
+
+      it(
+        'works fine if stream$ returned by eventRunner subscribe before emitting',
+        () => {
+          const stateStream = new StateStream('stateStream', 0)
+          let next
+          const observable = new stateStream.Observable(observer => {
+            next = value => observer.next(value)
+
+            return { unsubscribe: () => {} }
+          })
+
+          const mockSubscriber = jest.fn()
+
+          stateStream.eventRunner(null, observable).subscribe(mockSubscriber)
+          next(1)
+
+          expect(mockSubscriber.mock.calls).toEqual([[1]])
+        })
+
+      it('unsubscribe stream$ returned by eventRunner', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        const mockSubscriber = jest.fn()
+
+        const subscription = stateStream
+          .eventRunner(null, stateStream.state$)
+          .subscribe(mockSubscriber)
+
+        stateStream.next(() => 1)
+
+        expect(mockSubscriber.mock.calls.length).toEqual(2)
+
+        subscription.unsubscribe()
+        stateStream.next(() => 2)
+
+        expect(mockSubscriber.mock.calls.length).toEqual(2)
+      })
     })
 
     describe('dispose', () => {
       it('cannot calling next after stateStream disposed', () => {
+        global.console = { warn: jest.fn() }
         const stateStream = new StateStream('stateStream', 0)
         const mockSubscriber = jest.fn()
 

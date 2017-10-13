@@ -92,5 +92,22 @@ export default (Observable) => {
 
       expect(mockSubscriber.mock.calls).toEqual(mockCalls)
     })
+
+    it('stop observing after unsubscribed', () => {
+      const sourceA = new StateStream('sourceA', 'A')
+      const sourceB = new StateStream('sourceB', 'B')
+      const stream = new StateStream('stream', 'C', [sourceA, sourceB])
+
+      const mockSubscriber = jest.fn()
+      const subscription = stream.state$.subscribe(mockSubscriber)
+
+      subscription.unsubscribe()
+
+      sourceA.next(() => 'AA')
+      sourceB.next(() => 'BB')
+      stream.next(() => 'CC')
+
+      expect(mockSubscriber.mock.calls.length).toEqual(1)
+    })
   })
 }

@@ -44,7 +44,7 @@ describe('createReactObserver', () => {
   it('set displayName', () => {
     const stream = new StateStream('stream', '')
 
-    const Component = () => (
+    const HOCComponent = () => () => ( // eslint-disable-line react/display-name
       <div>Test Component</div>
     )
 
@@ -68,7 +68,7 @@ describe('createReactObserver', () => {
 
     const observer = stream.reactObserver
 
-    expect(observer()(Component).displayName).toEqual('RxactObserver(Component)')
+    expect(observer()(HOCComponent()).displayName).toEqual('RxactObserver(Component)')
     expect(observer()(Component2).displayName).toEqual('RxactObserver(component2)')
     expect(observer()(Component3).displayName).toEqual('RxactObserver(Component3)')
     expect(observer()(Component4).displayName).toEqual('RxactObserver(comp4)')
@@ -156,5 +156,40 @@ describe('createReactObserver', () => {
     stream.next(() => ({ state: 'B' }))
 
     expect(wrapper.props()).toEqual({ state: 'B' })
+  })
+
+  it('combine latest props with state', () => {
+    const Component = () => (
+      <div>Test Component</div>
+    )
+    const stream = new StateStream('stream', { A: 'A' })
+
+    const Container = stream.reactObserver()(Component)
+    const wrapper = shallow(<Container />)
+
+    expect(wrapper.props()).toEqual({ A: 'A' })
+
+    wrapper.setProps({ B: 'B' })
+
+    expect(wrapper.props()).toEqual({ A: 'A', B: 'B' })
+  })
+
+  it('calling unsubscribe when component unmounted', () => {
+    const Component = () => (
+      <div>Test Component</div>
+    )
+    const stream = new StateStream('stream', { A: 'A' })
+
+    const Container = stream.reactObserver()(Component)
+    const wrapper = shallow(<Container />)
+    wrapper.instance().componentWillUnmount()
+
+    wrapper.setProps({ A: 'B' })
+
+    expect(wrapper.props()).toEqual({ A: 'A' })
+
+    stream.next(() => ({ state: 'B' }))
+
+    expect(wrapper.props()).toEqual({ A: 'A' })
   })
 })

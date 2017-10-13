@@ -1,5 +1,4 @@
 // @flow
-import type { ComponentType } from 'react'
 import type {
   ESObservable, IESObservable, Subscription, SubscriptionObserver,
 } from '../Observable'
@@ -8,11 +7,12 @@ import stateFactory from './stateFactory'
 import combineStateStreams from './combineStateSteams'
 import createReactObserver from '../createReactObserver'
 import eventRunnerFactory from './eventRunnerFactory'
+import noop from '../utils/noop'
 
 export interface IStateStream {
   constructor(name: string, initialState: any): void,
 
-  name: ?string,
+  name: string,
 
   Observable: ESObservable,
 
@@ -34,9 +34,7 @@ export interface IStateStream {
 }
 
 const defaultFn = () => {
-  if (process.env.NODE_ENV !== 'test') {
-    console.warn('You are calling function on a disposed StateStream.')
-  }
+  console.warn('You are calling function on a disposed StateStream.')
 }
 
 export type StateStreams = Array<StateStream>
@@ -62,7 +60,7 @@ export default class StateStream implements IStateStream {
     this.eventRunner = eventRunnerFactory(this.Observable, this.getState)
   }
 
-  name = null
+  name = ''
 
   Observable = getObservable()
 
@@ -74,11 +72,9 @@ export default class StateStream implements IStateStream {
 
   next = defaultFn
 
-  reactObserver = (component: ComponentType<any>) => component
+  reactObserver = noop
 
-  getState = () => {
-    throw new Error('StateStream is invalid.')
-  }
+  getState = noop
 
   eventRunner = defaultFn
 
