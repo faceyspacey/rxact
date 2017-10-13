@@ -228,12 +228,25 @@ export default (Observable) => {
           }, {})
         })
 
-      it('return event stream$ by eventRunner', () => {
+      it('return new event stream$ by eventRunner', () => {
         const stateStream = new StateStream('stateStream', 0)
+        const mockListener = jest.fn()
 
-        stateStream.eventRunner().subscribe(state => {
+        stateStream.eventRunner(null).subscribe(state => {
           expect(state).toEqual(0)
         })
+
+        stateStream.eventRunner(() => {
+          return new stateStream.Observable(observer => {
+            mockListener()
+
+            observer.next(1)
+          })
+        }).subscribe(state => {
+          expect(state).toEqual(1)
+        })
+
+        expect(mockListener.mock.calls.length).toEqual(1)
       })
     })
 
