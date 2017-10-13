@@ -20,7 +20,7 @@ export default (Observable) => {
       expect(stateStream.reactObserver).toBeDefined()
       expect(stateStream.getState).toBeDefined()
       expect(stateStream.next).toBeDefined()
-      expect(stateStream.createEventStream).toBeDefined()
+      expect(stateStream.eventRunner).toBeDefined()
       expect(stateStream.dispose).toBeDefined()
     })
 
@@ -147,20 +147,20 @@ export default (Observable) => {
       })
     })
 
-    describe('createEventStream', () => {
+    describe('eventRunner', () => {
       it('throw error if factory is not a function', () => {
         const stateStream = new StateStream('stateStream', 0)
 
         expect(() => {
-          stateStream.createEventStream()
+          stateStream.eventRunner()
         }).not.toThrow()
 
         expect(() => {
-          stateStream.createEventStream(event$ => event$)
+          stateStream.eventRunner(event$ => event$)
         }).not.toThrow()
 
         expect(() => {
-          stateStream.createEventStream('')
+          stateStream.eventRunner('')
         }).toThrow()
       })
 
@@ -168,41 +168,36 @@ export default (Observable) => {
         const stateStream = new StateStream('stateStream', 0)
 
         expect(() => {
-          stateStream.createEventStream(() => {})
+          stateStream.eventRunner(() => {})
         }).toThrow()
 
         expect(() => {
-          stateStream.createEventStream(() => '')
+          stateStream.eventRunner(() => '')
         }).toThrow()
-      })
-
-      it('hook subscribing if passing function to run', () => {
-        const stateStream = new StateStream('stateStream', 0)
-        const event$ = stateStream.createEventStream()
-        const mockSubscriber = jest.fn()
-
-        event$.run(mockSubscriber)
-        expect(mockSubscriber.mock.calls).toEqual([[0]])
       })
 
       it('make state as input source if no source passed', () => {
         const stateStream = new StateStream('stateStream', 0)
 
-        const event$ = stateStream.createEventStream()
-        event$.run(state => {
-          expect(state).toEqual(0)
+        stateStream.eventRunner(event$ => {
+          event$.subscribe(state => {
+            expect(state).toEqual(0)
+          })
+
+          return event$
         })
       })
 
       it('accept input source if it is an observable', () => {
         const stateStream = new StateStream('stateStream', 0)
 
-        const event$ = stateStream.createEventStream(
-          null, stateStream.Observable.of('value')
-        )
-        event$.run(state => {
-          expect(state).toEqual('value')
-        })
+        stateStream.eventRunner(event$ => {
+          event$.subscribe(state => {
+            expect(state).toEqual('value')
+          })
+
+          return event$
+        }, stateStream.Observable.of('value'))
       })
 
       it(
@@ -210,16 +205,36 @@ export default (Observable) => {
         () => {
           const stateStream = new StateStream('stateStream', 0)
 
-          stateStream.createEventStream(null, 'value').run(state => {
-            expect(state).toEqual('value')
-          })
-          stateStream.createEventStream(null, 1).run(state => {
-            expect(state).toEqual(1)
-          })
-          stateStream.createEventStream(null, {}).run(state => {
-            expect(state).toEqual({})
-          })
+          stateStream.eventRunner(event$ => {
+            event$.subscribe(state => {
+              expect(state).toEqual('value')
+            })
+
+            return event$
+          }, 'value')
+          stateStream.eventRunner(event$ => {
+            event$.subscribe(state => {
+              expect(state).toEqual(1)
+            })
+
+            return event$
+          }, 1)
+          stateStream.eventRunner(event$ => {
+            event$.subscribe(state => {
+              expect(state).toEqual({})
+            })
+
+            return event$
+          }, {})
         })
+
+      it('return event stream$ by eventRunner', () => {
+        const stateStream = new StateStream('stateStream', 0)
+
+        stateStream.eventRunner().subscribe(state => {
+          expect(state).toEqual(0)
+        })
+      })
     })
 
     describe('dispose', () => {
