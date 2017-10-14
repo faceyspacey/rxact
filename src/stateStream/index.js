@@ -5,7 +5,6 @@ import type {
 import { getObservable } from '../Observable'
 import stateFactory from './stateFactory'
 import combineStateStreams from './combineStateSteams'
-import createReactObserver from '../createReactObserver'
 import eventRunnerFactory from './eventRunnerFactory'
 import noop from '../utils/noop'
 
@@ -21,8 +20,6 @@ export interface IStateStream {
   subscriptions: Array<Subscription>,
 
   observers: Array<SubscriptionObserver>,
-
-  reactObserver: Function,
 
   next(updater: Function): void,
 
@@ -50,13 +47,6 @@ export default class StateStream implements IStateStream {
 
     this.state$ = stateFactory.call(this, initialState, defaultFn)
     this.state$ = combineStateStreams.call(this, this.state$, name, stateStreams)
-    const {
-      decorator: reactObserver,
-      subscription: streamSubscription
-    } = createReactObserver(this.state$)
-
-    this.reactObserver = reactObserver
-    this.subscriptions.push(streamSubscription)
     this.eventRunner = eventRunnerFactory(this.Observable, this.getState)
   }
 

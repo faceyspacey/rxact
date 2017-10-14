@@ -17,7 +17,6 @@ export default (Observable) => {
 
       expect(stateStream.name).toBeDefined()
       expect(stateStream.state$).toBeDefined()
-      expect(stateStream.reactObserver).toBeDefined()
       expect(stateStream.getState).toBeDefined()
       expect(stateStream.next).toBeDefined()
       expect(stateStream.eventRunner).toBeDefined()
