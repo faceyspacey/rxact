@@ -15,15 +15,16 @@ export default (Observable) => {
     it('exposes the public API', () => {
       const stateStream = new StateStream('stream')
 
-      expect(stateStream.name).toBeDefined()
+      expect(stateStream.streamName).toBeDefined()
       expect(stateStream.state$).toBeDefined()
       expect(stateStream.getState).toBeDefined()
       expect(stateStream.next).toBeDefined()
       expect(stateStream.eventRunner).toBeDefined()
+      expect(stateStream.instance).toBeDefined()
       expect(stateStream.dispose).toBeDefined()
     })
 
-    it('throw if name is invalid', () => {
+    it('throw if stream name is invalid', () => {
       expect(() =>
         new StateStream('stream')
       ).not.toThrow()
@@ -284,6 +285,12 @@ export default (Observable) => {
 
         expect(mockSubscriber.mock.calls.length).toEqual(2)
       })
+    })
+
+    it('instance', () => {
+      const stateStream = new StateStream('stateStream', 0)
+
+      expect(stateStream.instance()).toBe(stateStream)
     })
 
     describe('dispose', () => {

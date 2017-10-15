@@ -20,8 +20,8 @@ export default (Observable) => {
 
       expect(() => {
         const source = new StateStream('source', '')
-        const stream = new StateStream('stream', '', [source])
-        new StateStream('stream', '', [source, stream])
+        const stream = new StateStream('streamA', '', [source])
+        new StateStream('streamB', '', [source, stream])
       }).not.toThrow()
 
       expect(() => {
@@ -35,6 +35,10 @@ export default (Observable) => {
       const sourceB = new StateStream('streamA', 'B')
       expect(() => {
         new StateStream('stream', null, [sourceA, sourceB])
+      }).toThrow()
+
+      expect(() => {
+        new StateStream('streamA', null, [sourceA])
       }).toThrow()
     })
 

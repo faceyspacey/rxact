@@ -3,7 +3,7 @@
 import $$observable from 'symbol-observable'
 import isObservable from '../utils/isObservable'
 
-interface ISubscriptionObserver {
+export interface ISubscriptionObserver {
 
     // Sends the next value in the sequence
     next(value: any): void,
@@ -20,7 +20,7 @@ interface ISubscriptionObserver {
 
 export type SubscriptionObserver = ISubscriptionObserver
 
-interface IObserver {
+export interface IObserver {
 
     // Receives the subscription object when `subscribe` is called
     start(subscription: Subscription): void,
@@ -40,7 +40,7 @@ export type Observer = IObserver
 export type SubscriberFunction = (observer: SubscriptionObserver) =>
   (void => void) | Subscription
 
-interface ISubscription {
+export interface ISubscription {
 
     // Cancels the subscription
     unsubscribe(): void,

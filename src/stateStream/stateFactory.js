@@ -1,5 +1,9 @@
 // @flow
-function stateFactory(initialState: any, defaultNext: Function) {
+const disposedFn = () => {
+  console.warn('You are calling function on a disposed StateStream.')
+}
+
+function stateFactory(initialState: any) {
   let state = initialState
   this.observers = []
 
@@ -28,7 +32,7 @@ function stateFactory(initialState: any, defaultNext: Function) {
 
     return {
       unsubscribe: () => {
-        this.next = defaultNext
+        this.next = disposedFn
       },
     }
   })
