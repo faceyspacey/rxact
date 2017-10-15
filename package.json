@@ -1,6 +1,6 @@
 {
   "name": "rxact",
-  "version": "0.8.9",
+  "version": "0.8.10",
   "description": "an observable state management for Javascript applications",
   "keywords": [
     "observable",
@@ -19,7 +19,7 @@
   },
   "private": false,
   "scripts": {
-    "build": "yarn build:lib && yarn build:es && yarn build:umd && yarn build:umd:min",
+    "build": "yarn build:lib && yarn build:es && yarn build:umd && yarn build:umd:min && cp -r flow-typed/rxact.js lib/rxact.js.flow",
     "build:lib": "NODE_ENV=production BABEL_ENV=lib babel src --out-dir lib --ignore __tests__",
     "build:es": "cross-env NODE_ENV=production BABEL_ENV=es babel src --out-dir es --ignore __tests__",
     "build:umd": "cross-env NODE_ENV=development webpack src/index.js dist/rxact.js",
