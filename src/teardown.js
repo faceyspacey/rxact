@@ -1,5 +1,5 @@
 // @flow
-import { cleanObservable } from './Observable'
+import { cleanObservable } from './observable'
 
 const teardown = () => {
   cleanObservable()

@@ -1,7 +1,7 @@
 // @flow
-import { setObservable } from './Observable'
+import { setObservable } from './observable'
 import isObservable from './utils/isObservable'
-import type { ESObservable } from './Observable'
+import type { ESObservable } from './observable'
 
 const setup = (Observable: ESObservable) => {
   if (!isObservable(Observable)) {

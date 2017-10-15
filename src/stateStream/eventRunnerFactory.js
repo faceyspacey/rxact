@@ -1,5 +1,5 @@
 // @flow
-import type { ESObservable, IESObservable } from '../Observable'
+import type { ESObservable, IESObservable } from '../observable'
 import isObservable from '../utils/isObservable'
 
 type Factory = IESObservable => IESObservable

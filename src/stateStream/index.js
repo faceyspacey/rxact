@@ -1,8 +1,8 @@
 // @flow
 import type {
-  ESObservable, IESObservable, Subscription, SubscriptionObserver,
-} from '../Observable'
-import { getObservable } from '../Observable'
+  ESObservable, IESObservable, ISubscription, ISubscriptionObserver,
+} from '../observable'
+import { getObservable } from '../observable'
 import stateFactory from './stateFactory'
 import combineStateStreams from './combineStateSteams'
 import eventRunnerFactory from './eventRunnerFactory'
@@ -16,9 +16,9 @@ export interface IStateStream {
 
   state$: IESObservable,
 
-  subscriptions: Array<Subscription>,
+  subscriptions: Array<ISubscription>,
 
-  observers: Array<SubscriptionObserver>,
+  observers: Array<ISubscriptionObserver>,
 
   next(updater: Function): void,
 

@@ -1,6 +1,5 @@
 // @flow
 // https://github.com/tc39/proposal-observable
-import $$observable from 'symbol-observable'
 import isObservable from '../utils/isObservable'
 
 export interface ISubscriptionObserver {
@@ -18,12 +17,10 @@ export interface ISubscriptionObserver {
     +closed: Boolean,
 }
 
-export type SubscriptionObserver = ISubscriptionObserver
-
 export interface IObserver {
 
     // Receives the subscription object when `subscribe` is called
-    start(subscription: Subscription): void,
+    start(subscription: ISubscription): void,
 
     // Receives the next value in the sequence
     next(value: any): void,
@@ -35,10 +32,8 @@ export interface IObserver {
     complete(): void,
 }
 
-export type Observer = IObserver
-
-export type SubscriberFunction = (observer: SubscriptionObserver) =>
-  (void => void) | Subscription
+export type SubscriberFunction =
+  (observer: ISubscriptionObserver) => (void => void) | ISubscription
 
 export interface ISubscription {
 
@@ -49,18 +44,16 @@ export interface ISubscription {
     +closed?: Boolean,
 }
 
-export type Subscription = ISubscription
-
 export interface IESObservable {
     constructor(subscriber: SubscriberFunction): void,
 
     // Subscribes to the sequence with an observer
-    subscribe(observer?: Observer): Subscription,
+    subscribe(observer?: IObserver): ISubscription,
 
     // Subscribes to the sequence with callbacks
     subscribe(onNext: Function,
               onError?: Function,
-              onComplete?: Function): Subscription,
+              onComplete?: Function): ISubscription,
 
     // Returns itself
     [$$observable]: () => IESObservable,
@@ -71,6 +64,8 @@ export interface IESObservable {
     // Converts an observable or iterable to an Observable
     static from(observable: IESObservable | Iterable<any>): IESObservable,
 }
+
+export type ESObservable = Class<IESObservable>
 
 let Observable: ?ESObservable = null
 
@@ -92,8 +87,6 @@ const getObservable = (): ESObservable => {
 const cleanObservable = () => {
   Observable = null
 }
-
-export type ESObservable = Class<IESObservable>
 
 export {
   setObservable,

@@ -1,4 +1,4 @@
-import { getObservable, setObservable, cleanObservable } from '../../src/Observable'
+import { getObservable, setObservable, cleanObservable } from '../../src/observable'
 import isObservable from '../../src/utils/isObservable'
 import teardown from '../../src/teardown'
 

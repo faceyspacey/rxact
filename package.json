@@ -19,12 +19,11 @@
   },
   "private": false,
   "scripts": {
-    "build": "yarn build:lib && yarn build:es && yarn build:umd && yarn build:umd:min && yarn build:flow",
+    "build": "yarn build:lib && yarn build:es && yarn build:umd && yarn build:umd:min",
     "build:lib": "NODE_ENV=production BABEL_ENV=lib babel src --out-dir lib --ignore __tests__",
     "build:es": "cross-env NODE_ENV=production BABEL_ENV=es babel src --out-dir es --ignore __tests__",
     "build:umd": "cross-env NODE_ENV=development webpack src/index.js dist/rxact.js",
     "build:umd:min": "cross-env NODE_ENV=production webpack src/index.js dist/rxact.min.js",
-    "build:flow": "cp src/*.js.flow lib",
     "clean": "rimraf dist lib es",
     "prepublish": "yarn lint && yarn test && yarn flow && yarn clean && yarn build",
     "lint": "eslint src",

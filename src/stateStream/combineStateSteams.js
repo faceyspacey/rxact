@@ -1,7 +1,7 @@
 // @flow
 import StateStream from './index'
 import isObservable from '../utils/isObservable'
-import type { IESObservable } from '../Observable'
+import type { IESObservable } from '../observable'
 import type { StateStreams } from './'
 
 function combineStateStreams(
