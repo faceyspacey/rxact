@@ -65,10 +65,6 @@ class StateStream implements IStateStream {
     this.subscriptions.forEach(subscription => {
       subscription.unsubscribe()
     })
-
-    this.observers.forEach(observer => {
-      observer.complete()
-    })
   }
 }
 

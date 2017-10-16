@@ -4,10 +4,27 @@ const disposedFn = () => {
 }
 
 function stateFactory(initialState: any) {
+  let disposed = false
   let state = initialState
   this.observers = []
 
   this.getState = () => state
+
+  this.next = (updater: Function) => {
+    if (disposed) {
+      return
+    }
+
+    if (typeof updater !== 'function') {
+      throw new Error('Expected passing a function to emitState.')
+    }
+
+    this.observers.forEach(observer => {
+      const nextState = updater(state)
+      state = nextState
+      observer.next(nextState)
+    })
+  }
 
   const state$ = new this.Observable(observer => {
     this.observers.push(observer)
@@ -21,35 +38,17 @@ function stateFactory(initialState: any) {
     }
   })
 
-  const stateUpdater$ = new this.Observable(observer => {
-    this.next = (updater: Function) => {
-      if (typeof updater !== 'function') {
-        throw new Error('Expected passing a function to emitState.')
-      }
+  this.subscriptions.push({
+    unsubscribe: () => {
+      disposed = true
+      this.next = disposedFn
 
-      observer.next(updater)
-    }
-
-    return {
-      unsubscribe: () => {
-        this.next = disposedFn
-      },
+      this.observers.forEach(observer => {
+        observer.complete()
+      })
+      this.observers = []
     }
   })
-
-  const emitState = (value) => {
-    this.observers.forEach(observer => {
-      observer.next(value)
-    })
-  }
-
-  const stateUpdaterSubscription = stateUpdater$.subscribe((updater) => {
-    const nextState = updater(state)
-    emitState(nextState)
-    state = nextState
-  })
-
-  this.subscriptions.push(stateUpdaterSubscription)
 
   return state$
 }

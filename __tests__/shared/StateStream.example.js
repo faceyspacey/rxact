@@ -54,22 +54,18 @@ export default (Observable) => {
         const initialState = 0
         const stateStream = new StateStream('stream', initialState)
         const newState = 1
-        let count = 0
 
-        stateStream.state$.subscribe(state => {
-          if (count > 0) {
-            return
-          }
+        const mockSubscriber1 = jest.fn()
+        const mockSubscriber2 = jest.fn()
 
-          count += 1
-          expect(state).toEqual(initialState)
-        })
+        stateStream.state$.subscribe(mockSubscriber1)
 
         stateStream.next(() => newState)
 
-        stateStream.state$.subscribe(state => {
-          expect(state).toEqual(newState)
-        }, false)
+        stateStream.state$.subscribe(mockSubscriber2)
+
+        expect(mockSubscriber1.mock.calls).toEqual([[0], [1]])
+        expect(mockSubscriber2.mock.calls).toEqual([[1]])
       })
 
       it('multiple subscribers receive same state at meantime', () => {
@@ -89,21 +85,26 @@ export default (Observable) => {
     })
 
     describe('getState', () => {
-      it('getState always get latest state of stream', () => {
+      it('get current state', () => {
         const initialState = 0
         const stateStream = new StateStream('stream', initialState)
         const emit = (value) => stateStream.next(() => value)
+        const mockFn = jest.fn()
 
-        expect(stateStream.getState()).toEqual(initialState)
+        stateStream.state$.subscribe(value => {
+          mockFn(value, stateStream.getState())
+        })
 
         emit(1)
-
-        expect(stateStream.getState()).toEqual(1)
-
         emit(2)
         emit(3)
 
-        expect(stateStream.getState()).toEqual(3)
+        expect(mockFn.mock.calls).toEqual([
+          [0, 0],
+          [1, 1],
+          [2, 2],
+          [3, 3],
+        ])
       })
     })
 
@@ -133,16 +134,23 @@ export default (Observable) => {
 
       it('emit new state through next', () => {
         const stateStream = new StateStream('stateStream', 0)
+        const mockFn = jest.fn()
+
+        stateStream.state$.subscribe(mockFn)
         stateStream.next(() => 1)
-        expect(stateStream.getState()).toEqual(1)
+
+        expect(mockFn.mock.calls).toEqual([[0], [1]])
       })
 
       it('emit new state based on previous state', () => {
         const stateStream = new StateStream('stateStream', 0)
+        const mockFn = jest.fn()
+
+        stateStream.state$.subscribe(mockFn)
         stateStream.next(count => count + 1)
         stateStream.next(count => count + 2)
 
-        expect(stateStream.getState()).toEqual(3)
+        expect(mockFn.mock.calls).toEqual([[0], [1], [3]])
       })
     })
 
