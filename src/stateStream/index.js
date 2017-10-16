@@ -30,8 +30,6 @@ export interface IStateStream {
 
   eventRunner: Function,
 
-  instance(): IStateStream,
-
   dispose(): void,
 }
 
@@ -45,7 +43,6 @@ class StateStream implements IStateStream {
   getState: Function
   next: Function
   eventRunner: Function
-  instance: Function
 
   constructor(streamName: string, initialState: any, stateStreams?: StateStreams) {
     if (typeof streamName !== 'string' || !streamName) {
@@ -73,10 +70,6 @@ class StateStream implements IStateStream {
       observer.complete()
     })
   }
-}
-
-StateStream.prototype.instance = function() {
-  return this
 }
 
 export default StateStream

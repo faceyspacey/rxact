@@ -20,7 +20,6 @@ export default (Observable) => {
       expect(stateStream.getState).toBeDefined()
       expect(stateStream.next).toBeDefined()
       expect(stateStream.eventRunner).toBeDefined()
-      expect(stateStream.instance).toBeDefined()
       expect(stateStream.dispose).toBeDefined()
     })
 
@@ -285,12 +284,6 @@ export default (Observable) => {
 
         expect(mockSubscriber.mock.calls.length).toEqual(2)
       })
-    })
-
-    it('instance', () => {
-      const stateStream = new StateStream('stateStream', 0)
-
-      expect(stateStream.instance()).toBe(stateStream)
     })
 
     describe('dispose', () => {
