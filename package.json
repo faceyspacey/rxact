@@ -1,6 +1,6 @@
 {
   "name": "rxact",
-  "version": "0.8.11",
+  "version": "0.8.12",
   "description": "an observable state management for Javascript applications",
   "keywords": [
     "observable",
