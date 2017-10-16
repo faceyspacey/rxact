@@ -1,6 +1,6 @@
 // @flow
 import { MemoryStream, Stream } from 'xstream'
-import type { SubscriberFunction } from './'
+import type { SubscriberFunction } from './index'
 
 Stream.prototype._xsSubscribe = Stream.prototype.subscribe
 Stream.prototype.subscribe = function subscribe(onNext, onError, onComplete) {

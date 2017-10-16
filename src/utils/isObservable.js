@@ -1,7 +1,9 @@
 // @flow
 import $$observable from 'symbol-observable'
 
-const isObservable = (Observable: any) => {
+export type IsObservable = any => boolean
+
+const isObservable: IsObservable = (Observable) => {
   if (!Observable) {
     return false
   }

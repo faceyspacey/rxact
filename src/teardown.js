@@ -1,7 +1,9 @@
 // @flow
 import { cleanObservable } from './observable'
 
-const teardown = () => {
+export type Teardown = Function
+
+const teardown: Teardown = () => {
   cleanObservable()
 }
 

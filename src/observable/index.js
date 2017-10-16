@@ -1,82 +1,18 @@
 // @flow
 // https://github.com/tc39/proposal-observable
 import isObservable from '../utils/isObservable'
-
-export interface ISubscriptionObserver {
-
-    // Sends the next value in the sequence
-    next(value: any): void,
-
-    // Sends the sequence error
-    error(errorValue: Error): void,
-
-    // Sends the completion notification
-    complete(): void,
-
-    // A boolean value indicating whether the subscription is closed
-    +closed: Boolean,
-}
-
-export interface IObserver {
-
-    // Receives the subscription object when `subscribe` is called
-    start(subscription: ISubscription): void,
-
-    // Receives the next value in the sequence
-    next(value: any): void,
-
-    // Receives the sequence error
-    error(errorValue: Error): void,
-
-    // Receives a completion notification
-    complete(): void,
-}
-
-export type SubscriberFunction =
-  (observer: ISubscriptionObserver) => (void => void) | ISubscription
-
-export interface ISubscription {
-
-    // Cancels the subscription
-    unsubscribe(): void,
-
-    // A boolean value indicating whether the subscription is closed
-    +closed?: Boolean,
-}
-
-export interface IESObservable {
-    constructor(subscriber: SubscriberFunction): void,
-
-    // Subscribes to the sequence with an observer
-    subscribe(observer?: IObserver): ISubscription,
-
-    // Subscribes to the sequence with callbacks
-    subscribe(onNext: Function,
-              onError?: Function,
-              onComplete?: Function): ISubscription,
-
-    // Returns itself
-    [$$observable]: () => IESObservable,
-
-    // Converts items to an Observable
-    static of(...items: Array<any>): IESObservable,
-
-    // Converts an observable or iterable to an Observable
-    static from(observable: IESObservable | Iterable<any>): IESObservable,
-}
-
-export type ESObservable = Class<IESObservable>
+import type { ESObservable } from './index'
 
 let Observable: ?ESObservable = null
 
-const setObservable = (ObservableImplement: ESObservable) => {
+export const setObservable = (ObservableImplement: ESObservable) => {
   if (isObservable(Observable)) {
     throw new Error('Expected setup once in your app lifetime.')
   }
   Observable = ObservableImplement
 }
 
-const getObservable = (): ESObservable => {
+export const getObservable = (): ESObservable => {
   if (!Observable) {
     throw Error('You must configure Observable first.')
   }
@@ -84,12 +20,6 @@ const getObservable = (): ESObservable => {
   return Observable
 }
 
-const cleanObservable = () => {
+export const cleanObservable = () => {
   Observable = null
-}
-
-export {
-  setObservable,
-  getObservable,
-  cleanObservable,
 }

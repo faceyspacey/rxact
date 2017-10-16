@@ -1,7 +1,11 @@
 // @flow
 import type {
-  ESObservable, IESObservable, ISubscription, ISubscriptionObserver,
+  ESObservable,
+  IESObservable,
+  ISubscription,
+  ISubscriptionObserver,
 } from '../observable'
+import type { EventRunner as EventRunnerType } from './eventRunnerFactory'
 import { getObservable } from '../observable'
 import stateFactory from './stateFactory'
 import combineStateStreams from './combineStateSteams'
@@ -31,7 +35,8 @@ export interface IStateStream {
   dispose(): void,
 }
 
-export type StateStreams = Array<StateStream>
+export type StateStreams = Array<IStateStream>
+export type EventRunner = EventRunnerType
 
 class StateStream implements IStateStream {
   state$: IESObservable

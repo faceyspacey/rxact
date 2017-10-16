@@ -9,8 +9,6 @@
     "extends": [
       "eslint:recommended",
       "plugin:react/recommended",
-      "plugin:import/errors",
-      "plugin:import/warnings",
       "plugin:flowtype/recommended"
     ],
     "parserOptions": {
@@ -21,7 +19,6 @@
         "sourceType": "module"
     },
     "plugins": [
-      "import",
       "jest",
       "flowtype",
       "react"
@@ -44,10 +41,5 @@
         "no-console": 0,
     },
     "settings": {
-      "import/resolver": {
-        "node": {
-          "extensions": [".js", ".json"]
-        }
-      }
     }
 }
