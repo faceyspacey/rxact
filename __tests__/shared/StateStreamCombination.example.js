@@ -104,7 +104,6 @@ export default (Observable) => {
 
       const mockSubscriber = jest.fn()
       const subscription = stream.state$.subscribe(mockSubscriber)
-      console.log(subscription.unsubscribe)
 
       subscription.unsubscribe()
 
