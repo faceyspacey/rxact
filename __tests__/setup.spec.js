@@ -1,4 +1,5 @@
 import Observable from 'zen-observable'
+import StateStream from '../src/stateStream'
 import setup from '../src/setup'
 import teardown from '../src/teardown'
 
@@ -31,5 +32,17 @@ describe('setup', () => {
     expect(() => {
       setup({ Observable })
     }).toThrow()
+  })
+
+  it('throw error if \'plugins\' is not an array', () => {
+    expect(() => {
+      setup({ Observable, plugins: '' })
+    }).toThrow()
+  })
+
+  it('setup plugins', () => {
+    expect(StateStream.plugins.length).toBe(0)
+    setup({ Observable, plugins: [() => {}] })
+    expect(StateStream.plugins.length).toBe(1)
   })
 })
