@@ -4,7 +4,7 @@ import StateStream from '../../src/stateStream'
 
 export default (Observable) => {
   beforeAll(() => {
-    setup(Observable)
+    setup({ Observable })
   })
 
   afterAll(() => {

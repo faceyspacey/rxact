@@ -4,7 +4,7 @@ import StateStream from '../../src/stateStream'
 
 export default (Observable) => {
   beforeEach(() => {
-    setup(Observable)
+    setup({ Observable })
   })
 
   afterEach(() => {
@@ -12,6 +12,11 @@ export default (Observable) => {
   })
 
   describe('StateStream', () => {
+    it('exposes the static API', () => {
+      expect(StateStream.plugins).toBeDefined()
+      expect(StateStream.addPlugin).toBeDefined()
+    })
+
     it('exposes the public API', () => {
       const stateStream = new StateStream('stream')
 
@@ -47,6 +52,67 @@ export default (Observable) => {
       expect(() =>
         new StateStream(() => {})
       ).toThrow()
+    })
+
+    describe('plugins', () => {
+      it('throw error if plugin is not a function', () => {
+        expect(() => {
+          StateStream.addPlugin(() => {})
+        }).not.toThrow()
+
+        expect(() => {
+          StateStream.addPlugin('')
+        }).toThrow()
+
+        expect(() => {
+          StateStream.addPlugin({})
+        }).toThrow()
+      })
+
+      it('add plugins', () => {
+        StateStream.addPlugin(() => {})
+        expect(StateStream.plugins.length).toBe(1)
+        StateStream.addPlugin(() => {}, () => {})
+        expect(StateStream.plugins.length).toBe(3)
+      })
+
+      it('remove plugin', () => {
+        const plugin1 = () => {}
+        const plugin2 = () => {}
+        const plugin3 = () => {}
+        const plugin4 = () => {}
+        const plugin5 = () => {}
+        StateStream.addPlugin(plugin1, plugin2, plugin3, plugin4)
+        expect(StateStream.plugins.length).toBe(4)
+        StateStream.removePlugin(plugin5)
+        expect(StateStream.plugins.length).toBe(4)
+        StateStream.removePlugin(plugin4)
+        expect(StateStream.plugins.length).toBe(3)
+        StateStream.removePlugin(plugin3, plugin2)
+        expect(StateStream.plugins.length).toBe(1)
+        StateStream.removePlugin()
+        expect(StateStream.plugins.length).toBe(0)
+      })
+
+      it('access instance in plugin', () => {
+        const plugin = (instance) => {
+          expect(instance).toBeInstanceOf(StateStream)
+        }
+
+        StateStream.addPlugin(plugin)
+
+        new StateStream('stream', 0)
+      })
+
+      it('add instance function in plugin', () => {
+        const plugin = (instance) => {
+          instance.newMethd = () => {}
+        }
+        StateStream.addPlugin(plugin)
+
+        const stream = new StateStream('stream', 0)
+        expect(stream.newMethd).toBeDefined()
+      })
     })
 
     describe('state$', () => {
