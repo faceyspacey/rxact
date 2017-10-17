@@ -12,6 +12,11 @@ import combineStateStreams from './combineStateSteams'
 import eventRunnerFactory from './eventRunnerFactory'
 
 export interface IStateStream {
+  static plugins: Array<Function>,
+
+  static addPlugin: (...Array<Function>) => void,
+  static removePlugin: (...Array<Function>) => void,
+
   constructor(streamName: string, initialState: any): void,
 
   streamName: string,
@@ -31,6 +36,8 @@ export interface IStateStream {
   eventRunner: Function,
 
   dispose(): void,
+
+  installPlugins: () => void,
 }
 
 export type StateStreams = Array<IStateStream>
@@ -44,6 +51,29 @@ class StateStream implements IStateStream {
   next: Function
   eventRunner: Function
 
+  static plugins = []
+
+  static addPlugin = (...plugins) => {
+    plugins.forEach(plugin => {
+      if (typeof plugin !== 'function') {
+        throw new Error('Expected plugin to be a function.')
+      }
+    })
+
+    StateStream.plugins = [...StateStream.plugins, ...plugins]
+  }
+
+  static removePlugin = (...plugins) => {
+    let finalPlugins = []
+    if (plugins.length !== 0) {
+      finalPlugins = StateStream.plugins.filter(
+        plugin => !plugins.find(removedPlugin => removedPlugin === plugin)
+      )
+    }
+
+    StateStream.plugins = finalPlugins
+  }
+
   constructor(streamName: string, initialState: any, stateStreams?: StateStreams) {
     if (typeof streamName !== 'string' || !streamName) {
       throw new Error('Expected the streamName to be a not none string.')
@@ -55,6 +85,7 @@ class StateStream implements IStateStream {
     this.state$ = stateFactory.call(this, initialState)
     this.state$ = combineStateStreams.call(this, this.state$, streamName, stateStreams)
     this.eventRunner = eventRunnerFactory(this.Observable, this.getState)
+    this.installPlugins()
   }
 
   subscriptions = []
@@ -64,6 +95,16 @@ class StateStream implements IStateStream {
   dispose = () => {
     this.subscriptions.forEach(subscription => {
       subscription.unsubscribe()
+    })
+  }
+
+  installPlugins = () => {
+    StateStream.plugins.forEach(plugin => {
+      if (typeof plugin !== 'function') {
+        throw new Error('Expected plugin to be a function.')
+      }
+
+      plugin(this)
     })
   }
 }

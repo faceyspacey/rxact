@@ -1,7 +1,6 @@
 {
   "presets": [
     ["env", { "modules": false }],
-    "react",
     "flow"
   ],
   "plugins": [
@@ -27,7 +26,6 @@
     "lib": {
       "presets": [
         "env",
-        "react",
         "flow"
       ],
       "plugins": [
