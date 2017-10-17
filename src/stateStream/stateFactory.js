@@ -19,9 +19,9 @@ function stateFactory(initialState: any) {
       throw new Error('Expected passing a function to emitState.')
     }
 
+    const nextState = updater(state)
+    state = nextState
     this.observers.forEach(observer => {
-      const nextState = updater(state)
-      state = nextState
       observer.next(nextState)
     })
   }

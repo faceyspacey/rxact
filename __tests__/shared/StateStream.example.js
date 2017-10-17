@@ -143,7 +143,7 @@ export default (Observable) => {
         stateStream.state$.subscribe(mockSubscriber1)
         stateStream.state$.subscribe(mockSubscriber2)
 
-        stateStream.next(() => newState)
+        stateStream.next(preState => preState + newState)
 
         expect(mockSubscriber1.mock.calls).toEqual([[0], [1]])
         expect(mockSubscriber2.mock.calls).toEqual([[0], [1]])
