@@ -1,7 +1,6 @@
 // @flow
 import StateStream from './stateStream'
-import setup from './setup'
-import teardown from './teardown'
+import { setup, teardown } from './helpers'
 import { getObservable } from './observable'
 import isObservable from './utils/isObservable'
 

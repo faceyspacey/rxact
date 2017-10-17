@@ -1,7 +1,6 @@
 import Observable from 'zen-observable'
 import StateStream from '../src/stateStream'
-import setup from '../src/setup'
-import teardown from '../src/teardown'
+import { setup, teardown } from '../src/helpers'
 
 describe('setup', () => {
   beforeEach(() => {

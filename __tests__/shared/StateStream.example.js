@@ -1,5 +1,4 @@
-import setup from '../../src/setup'
-import teardown from '../../src/teardown'
+import { setup, teardown } from '../../src/helpers'
 import StateStream from '../../src/stateStream'
 
 export default (Observable) => {

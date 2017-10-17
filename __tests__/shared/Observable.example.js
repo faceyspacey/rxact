@@ -1,6 +1,6 @@
 import { getObservable, setObservable, cleanObservable } from '../../src/observable'
 import isObservable from '../../src/utils/isObservable'
-import teardown from '../../src/teardown'
+import { teardown } from '../../src/helpers'
 
 export default (Observable) => {
   describe('Observable', () => {
