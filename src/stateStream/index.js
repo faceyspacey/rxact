@@ -35,6 +35,8 @@ export interface IStateStream {
 
   eventRunner: Function,
 
+  defineUpdater(name: string, updater: Function): void,
+
   dispose(): void,
 
   installPlugins: () => void,
@@ -91,6 +93,24 @@ class StateStream implements IStateStream {
   subscriptions = []
 
   observers = []
+
+  defineUpdater = (name: string, updater: Function) => {
+    if (!name) {
+      throw new Error('defineUpdater(): name should not be blank.')
+    }
+    if (typeof updater !== 'function') {
+      throw new Error('defineUpdater(): second parameter should be a function.')
+    }
+
+    // $flow-ignore
+    this[name] = function(...params) {
+      this.next(updater(...params))
+    }
+    // $flow-ignore
+    const updaterInstance = this[name]
+    Object.defineProperty(updaterInstance, 'name', { value: name, writable: false })
+    Object.defineProperty(updaterInstance, '_updater', { value: updater })
+  }
 
   dispose = () => {
     this.subscriptions.forEach(subscription => {

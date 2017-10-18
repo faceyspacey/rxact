@@ -24,6 +24,7 @@ export default (Observable) => {
       expect(stateStream.getState).toBeDefined()
       expect(stateStream.next).toBeDefined()
       expect(stateStream.eventRunner).toBeDefined()
+      expect(stateStream.defineUpdater).toBeDefined()
       expect(stateStream.dispose).toBeDefined()
     })
 
@@ -356,6 +357,56 @@ export default (Observable) => {
         stateStream.next(() => 2)
 
         expect(mockSubscriber.mock.calls.length).toEqual(2)
+      })
+    })
+
+    describe('defineUpdater', () => {
+      it('throw error if name is blank', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        expect(() => {
+          stateStream.defineUpdater(
+            '', (value) => (prevState) => (prevState + value)
+          )
+        }).toThrow()
+      })
+
+      it('throw error if updater is not a function', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        expect(() => {
+          stateStream.defineUpdater('testa', {})
+        }).toThrow()
+      })
+
+      it('add a updater to stream', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        stateStream.defineUpdater(
+          'updater1', (value) => (prevState) => (prevState + value)
+        )
+
+        expect(stateStream.updater1).toBeDefined()
+      })
+
+      it('expect _name and _updater exist in updater', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        const _updater = (value) => (prevState) => (prevState + value)
+        stateStream.defineUpdater('updater1', _updater)
+
+        expect(stateStream.updater1.name).toBe('updater1')
+        expect(stateStream.updater1._updater).toBe(_updater)
+      })
+
+      it('update the state through updater', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        stateStream.defineUpdater(
+          'updater1', (value) => (prevState) => (prevState + value)
+        )
+
+        const mockSubscriber = jest.fn()
+
+        stateStream.state$.subscribe(mockSubscriber)
+        stateStream.updater1(1)
+
+        expect(mockSubscriber.mock.calls).toEqual([[0], [1]])
       })
     })
 
