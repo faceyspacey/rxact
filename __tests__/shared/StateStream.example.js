@@ -24,15 +24,12 @@ export default (Observable) => {
       expect(stateStream.getState).toBeDefined()
       expect(stateStream.next).toBeDefined()
       expect(stateStream.eventRunner).toBeDefined()
-<<<<<<< HEAD
-      expect(stateStream.defineUpdater).toBeDefined()
-=======
       expect(stateStream.updater).toBeDefined()
       expect(stateStream.event).toBeDefined()
       expect(stateStream.updaters).toBeDefined()
       expect(stateStream.events).toBeDefined()
->>>>>>> release/0.10.0
       expect(stateStream.dispose).toBeDefined()
+      expect(stateStream.installPlugins).toBeDefined()
     })
 
     it('throw if stream name is invalid', () => {
@@ -447,6 +444,19 @@ export default (Observable) => {
         expect(stateStream.events.event1).toBeDefined()
         expect(mockSubscriber.mock.calls).toEqual([[0]])
       })
+
+      it('execute event with sourceCreator', () => {
+        const mockSubscriber = jest.fn()
+        const stateStream = new StateStream('stateStream', 0)
+
+        stateStream.event('event1', source$ => source$, value => value)
+        const event$ = stateStream.event1(1)
+        event$.subscribe(mockSubscriber)
+
+        expect(stateStream.event1).toBeDefined()
+        expect(stateStream.events.event1).toBeDefined()
+        expect(mockSubscriber.mock.calls).toEqual([[1]])
+      })
     })
 
     describe('dispose', () => {
@@ -461,6 +471,13 @@ export default (Observable) => {
         stateStream.next(() => 1)
 
         expect(mockSubscriber.mock.calls.length).toEqual(1)
+      })
+    })
+
+    describe('installPlugins', () => {
+      it('throw error if plugin is not a function', () => {
+        StateStream.plugins = ['']
+        expect(() => new StateStream('stateStream', 0)).toThrow()
       })
     })
   })
