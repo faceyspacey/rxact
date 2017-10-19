@@ -24,7 +24,14 @@ export default (Observable) => {
       expect(stateStream.getState).toBeDefined()
       expect(stateStream.next).toBeDefined()
       expect(stateStream.eventRunner).toBeDefined()
+<<<<<<< HEAD
       expect(stateStream.defineUpdater).toBeDefined()
+=======
+      expect(stateStream.updater).toBeDefined()
+      expect(stateStream.event).toBeDefined()
+      expect(stateStream.updaters).toBeDefined()
+      expect(stateStream.events).toBeDefined()
+>>>>>>> release/0.10.0
       expect(stateStream.dispose).toBeDefined()
     })
 
@@ -360,53 +367,85 @@ export default (Observable) => {
       })
     })
 
-    describe('defineUpdater', () => {
-      it('throw error if name is blank', () => {
+    describe('updater', () => {
+      it('throw error if name is invalid', () => {
         const stateStream = new StateStream('stateStream', 0)
-        expect(() => {
-          stateStream.defineUpdater(
-            '', (value) => (prevState) => (prevState + value)
-          )
-        }).toThrow()
+        expect(() => stateStream.updater('', () => {})).toThrow()
+        expect(() => stateStream.updater('test', () => {})).not.toThrow()
       })
 
-      it('throw error if updater is not a function', () => {
+      it('throw error if operator exists', () => {
         const stateStream = new StateStream('stateStream', 0)
-        expect(() => {
-          stateStream.defineUpdater('testa', {})
-        }).toThrow()
+        stateStream.operator = () => {}
+        expect(() => stateStream.updater('operator', () => {})).toThrow()
       })
 
-      it('add a updater to stream', () => {
+      it('throw error if _updater is not a function', () => {
         const stateStream = new StateStream('stateStream', 0)
-        stateStream.defineUpdater(
-          'updater1', (value) => (prevState) => (prevState + value)
-        )
-
-        expect(stateStream.updater1).toBeDefined()
+        expect(() => stateStream.updater('test1')).toThrow()
+        expect(() => stateStream.updater('test2', () => {})).not.toThrow()
       })
 
-      it('expect _name and _updater exist in updater', () => {
-        const stateStream = new StateStream('stateStream', 0)
-        const _updater = (value) => (prevState) => (prevState + value)
-        stateStream.defineUpdater('updater1', _updater)
-
-        expect(stateStream.updater1.name).toBe('updater1')
-        expect(stateStream.updater1._updater).toBe(_updater)
-      })
-
-      it('update the state through updater', () => {
-        const stateStream = new StateStream('stateStream', 0)
-        stateStream.defineUpdater(
-          'updater1', (value) => (prevState) => (prevState + value)
-        )
-
+      it('update state through updater', () => {
         const mockSubscriber = jest.fn()
+        const stateStream = new StateStream('stateStream', 0)
 
+        stateStream.updater('updater1', value => prevState => (prevState + value))
         stateStream.state$.subscribe(mockSubscriber)
         stateStream.updater1(1)
 
+        expect(stateStream.updater1).toBeDefined()
+        expect(stateStream.updaters.updater1).toBeDefined()
         expect(mockSubscriber.mock.calls).toEqual([[0], [1]])
+      })
+    })
+
+    describe('event', () => {
+      it('throw error if name is invalid', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        expect(() => stateStream.event('', s$ => s$)).toThrow()
+        expect(() => stateStream.event('test', s$ => s$)).not.toThrow()
+      })
+
+      it('throw error if operator exists', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        stateStream.operator = () => {}
+        expect(() => stateStream.event('operator', s$ => s$)).toThrow()
+      })
+
+      it('throw error if sourceCreator exist and is not a function', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        expect(() => stateStream.event('event1', s$ => s$, {})).toThrow()
+        expect(() => stateStream.event('event2', s$ => s$, value => value)).not.toThrow()
+      })
+
+      it('throw error if runner is not a function', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        expect(() => stateStream.event('event1', {})).toThrow()
+      })
+
+      it('access params in runner', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        stateStream.event('event1', (source$, value) => {
+          expect(value).toEqual('test')
+
+          return source$
+        })
+
+        stateStream.event1('test')
+      })
+
+      it('execute event', () => {
+        const mockSubscriber = jest.fn()
+        const stateStream = new StateStream('stateStream', 0)
+
+        stateStream.event('event1', source$ => source$)
+        const event$ = stateStream.event1()
+        event$.subscribe(mockSubscriber)
+
+        expect(stateStream.event1).toBeDefined()
+        expect(stateStream.events.event1).toBeDefined()
+        expect(mockSubscriber.mock.calls).toEqual([[0]])
       })
     })
 

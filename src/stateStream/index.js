@@ -25,6 +25,14 @@ export interface IStateStream {
 
   state$: IESObservable,
 
+  updaters: Object,
+
+  events: Object,
+
+  updater(name: string, fn: Function): void,
+
+  event(name: string, sourceCreator: Function, runner?: Function): void,
+
   subscriptions: Array<ISubscription>,
 
   observers: Array<ISubscriptionObserver>,
@@ -34,8 +42,6 @@ export interface IStateStream {
   getState(): any,
 
   eventRunner: Function,
-
-  defineUpdater(name: string, updater: Function): void,
 
   dispose(): void,
 
@@ -90,26 +96,66 @@ class StateStream implements IStateStream {
     this.installPlugins()
   }
 
+  updaters = {}
+
+  events = {}
+
   subscriptions = []
 
   observers = []
 
-  defineUpdater = (name: string, updater: Function) => {
+  updater = (name: string, _updater: Function) => {
     if (!name) {
-      throw new Error('defineUpdater(): name should not be blank.')
-    }
-    if (typeof updater !== 'function') {
-      throw new Error('defineUpdater(): second parameter should be a function.')
+      throw new Error('updater(): name should not be blank.')
     }
 
     // $flow-ignore
-    this[name] = function(...params) {
-      this.next(updater(...params))
+    if (this[name]) {
+      throw new Error(`updater(): operator ${name} exist.`)
+    }
+
+    if (typeof _updater !== 'function') {
+      throw new Error('updater(): expect second parameter to be a function.')
+    }
+
+    // $flow-ignore
+    this[name] = (...params) => this.next(_updater(...params))
+    // $flow-ignore
+    this.updaters[name] = this[name]
+  }
+
+  event = (name: string, runner: Function, sourceCreator?: Function) => {
+    if (!name) {
+      throw new Error('event(): name should not be blank.')
+    }
+
+    // $flow-ignore
+    if (this[name]) {
+      throw new Error(`event(): operator ${name} exist.`)
+    }
+
+    if (sourceCreator && typeof sourceCreator !== 'function') {
+      throw new Error('updater(): expect sourceCreator to be a function.')
+    }
+
+    if (typeof runner !== 'function') {
+      throw new Error('updater(): expect runner to be a function.')
+    }
+
+    // $flow-ignore
+    this[name] = (...params) => {
+      let source$ = undefined
+
+      if (sourceCreator) {
+        source$ = sourceCreator(...params)
+      }
+
+      const _runner = source$ => runner(source$, ...params)
+
+      return this.eventRunner(_runner, source$)
     }
     // $flow-ignore
-    const updaterInstance = this[name]
-    Object.defineProperty(updaterInstance, 'name', { value: name, writable: false })
-    Object.defineProperty(updaterInstance, '_updater', { value: updater })
+    this.events[name] = this[name]
   }
 
   dispose = () => {
