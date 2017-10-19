@@ -45,7 +45,7 @@ export interface IStateStream {
 
   dispose(): void,
 
-  installPlugins: () => void,
+  installPlugins: () => Proxy<IStateStream> | IStateStream,
 }
 
 export type StateStreams = Array<IStateStream>
@@ -93,7 +93,7 @@ class StateStream implements IStateStream {
     this.state$ = stateFactory.call(this, initialState)
     this.state$ = combineStateStreams.call(this, this.state$, streamName, stateStreams)
     this.eventRunner = eventRunnerFactory(this.Observable, this.getState)
-    this.installPlugins()
+    return this.installPlugins()
   }
 
   updaters = {}
@@ -165,13 +165,20 @@ class StateStream implements IStateStream {
   }
 
   installPlugins = () => {
+    let proxy = this
     StateStream.plugins.forEach(plugin => {
       if (typeof plugin !== 'function') {
         throw new Error('Expected plugin to be a function.')
       }
 
-      plugin(this)
+      const pluginProxy = plugin(proxy)
+
+      if (pluginProxy) {
+        proxy = pluginProxy
+      }
     })
+
+    return proxy
   }
 }
 
