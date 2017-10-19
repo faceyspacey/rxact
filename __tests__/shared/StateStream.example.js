@@ -25,6 +25,10 @@ export default (Observable) => {
       expect(stateStream.getState).toBeDefined()
       expect(stateStream.next).toBeDefined()
       expect(stateStream.eventRunner).toBeDefined()
+      expect(stateStream.updater).toBeDefined()
+      expect(stateStream.event).toBeDefined()
+      expect(stateStream.updaters).toBeDefined()
+      expect(stateStream.events).toBeDefined()
       expect(stateStream.dispose).toBeDefined()
     })
 
@@ -357,6 +361,88 @@ export default (Observable) => {
         stateStream.next(() => 2)
 
         expect(mockSubscriber.mock.calls.length).toEqual(2)
+      })
+    })
+
+    describe('updater', () => {
+      it('throw error if name is invalid', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        expect(() => stateStream.updater('', () => {})).toThrow()
+        expect(() => stateStream.updater('test', () => {})).not.toThrow()
+      })
+
+      it('throw error if operator exists', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        stateStream.operator = () => {}
+        expect(() => stateStream.updater('operator', () => {})).toThrow()
+      })
+
+      it('throw error if _updater is not a function', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        expect(() => stateStream.updater('test1')).toThrow()
+        expect(() => stateStream.updater('test2', () => {})).not.toThrow()
+      })
+
+      it('update state through updater', () => {
+        const mockSubscriber = jest.fn()
+        const stateStream = new StateStream('stateStream', 0)
+
+        stateStream.updater('updater1', value => prevState => (prevState + value))
+        stateStream.state$.subscribe(mockSubscriber)
+        stateStream.updater1(1)
+
+        expect(stateStream.updater1).toBeDefined()
+        expect(stateStream.updaters.updater1).toBeDefined()
+        expect(mockSubscriber.mock.calls).toEqual([[0], [1]])
+      })
+    })
+
+    describe('event', () => {
+      it('throw error if name is invalid', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        expect(() => stateStream.event('', s$ => s$)).toThrow()
+        expect(() => stateStream.event('test', s$ => s$)).not.toThrow()
+      })
+
+      it('throw error if operator exists', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        stateStream.operator = () => {}
+        expect(() => stateStream.event('operator', s$ => s$)).toThrow()
+      })
+
+      it('throw error if sourceCreator exist and is not a function', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        expect(() => stateStream.event('event1', s$ => s$, {})).toThrow()
+        expect(() => stateStream.event('event2', s$ => s$, value => value)).not.toThrow()
+      })
+
+      it('throw error if runner is not a function', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        expect(() => stateStream.event('event1', {})).toThrow()
+      })
+
+      it('access params in runner', () => {
+        const stateStream = new StateStream('stateStream', 0)
+        stateStream.event('event1', (source$, value) => {
+          expect(value).toEqual('test')
+
+          return source$
+        })
+
+        stateStream.event1('test')
+      })
+
+      it('execute event', () => {
+        const mockSubscriber = jest.fn()
+        const stateStream = new StateStream('stateStream', 0)
+
+        stateStream.event('event1', source$ => source$)
+        const event$ = stateStream.event1()
+        event$.subscribe(mockSubscriber)
+
+        expect(stateStream.event1).toBeDefined()
+        expect(stateStream.events.event1).toBeDefined()
+        expect(mockSubscriber.mock.calls).toEqual([[0]])
       })
     })
 
