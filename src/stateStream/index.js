@@ -27,11 +27,7 @@ export interface IStateStream {
 
   updaters: Object,
 
-  events: Object,
-
   updater(name: string, fn: Function): void,
-
-  event(name: string, sourceCreator: Function, runner?: Function): void,
 
   subscriptions: Array<ISubscription>,
 
@@ -98,8 +94,6 @@ class StateStream implements IStateStream {
 
   updaters = {}
 
-  events = {}
-
   subscriptions = []
 
   observers = []
@@ -122,40 +116,6 @@ class StateStream implements IStateStream {
     this[name] = (...params) => this.next(_updater(...params))
     // $flow-ignore
     this.updaters[name] = this[name]
-  }
-
-  event = (name: string, runner: Function, sourceCreator?: Function) => {
-    if (!name) {
-      throw new Error('event(): name should not be blank.')
-    }
-
-    // $flow-ignore
-    if (this[name]) {
-      throw new Error(`event(): operator ${name} exist.`)
-    }
-
-    if (sourceCreator && typeof sourceCreator !== 'function') {
-      throw new Error('updater(): expect sourceCreator to be a function.')
-    }
-
-    if (typeof runner !== 'function') {
-      throw new Error('updater(): expect runner to be a function.')
-    }
-
-    // $flow-ignore
-    this[name] = (...params) => {
-      let source$ = undefined
-
-      if (sourceCreator) {
-        source$ = sourceCreator(...params)
-      }
-
-      const _runner = source$ => runner(source$, ...params)
-
-      return this.eventRunner(_runner, source$)
-    }
-    // $flow-ignore
-    this.events[name] = this[name]
   }
 
   dispose = () => {
