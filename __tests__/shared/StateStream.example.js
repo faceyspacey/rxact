@@ -369,12 +369,6 @@ export default (Observable) => {
         expect(() => stateStream.updater('test', () => {})).not.toThrow()
       })
 
-      it('throw error if operator exists', () => {
-        const stateStream = new StateStream('stateStream', 0)
-        stateStream.operator = () => {}
-        expect(() => stateStream.updater('operator', () => {})).toThrow()
-      })
-
       it('throw error if _updater is not a function', () => {
         const stateStream = new StateStream('stateStream', 0)
         expect(() => stateStream.updater('test1')).toThrow()

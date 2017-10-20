@@ -103,11 +103,6 @@ class StateStream implements IStateStream {
       throw new Error('updater(): name should not be blank.')
     }
 
-    // $flow-ignore
-    if (this[name]) {
-      throw new Error(`updater(): operator ${name} exist.`)
-    }
-
     if (typeof _updater !== 'function') {
       throw new Error('updater(): expect second parameter to be a function.')
     }
