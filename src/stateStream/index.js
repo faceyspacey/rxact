@@ -98,7 +98,7 @@ class StateStream implements IStateStream {
 
   observers = []
 
-  updater = (name: string, _updater: Function) => {
+  updater(name: string, _updater: Function) {
     if (!name) {
       throw new Error('updater(): name should not be blank.')
     }
@@ -113,7 +113,9 @@ class StateStream implements IStateStream {
     }
 
     // $flow-ignore
-    this[name] = (...params) => this.next(_updater(...params))
+    this[name] = (...params) => {
+      this.next(_updater(...params))
+    }
     // $flow-ignore
     this.updaters[name] = this[name]
   }
