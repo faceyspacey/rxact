@@ -24,8 +24,8 @@ export default (Observable) => {
       expect(stateStream.getState).toBeDefined()
       expect(stateStream.next).toBeDefined()
       expect(stateStream.eventRunner).toBeDefined()
-      expect(stateStream.updater).toBeDefined()
-      expect(stateStream.updaters).toBeDefined()
+      expect(stateStream.emitter).toBeDefined()
+      expect(stateStream.emitters).toBeDefined()
       expect(stateStream.dispose).toBeDefined()
       expect(stateStream.installPlugins).toBeDefined()
     })
@@ -362,29 +362,29 @@ export default (Observable) => {
       })
     })
 
-    describe('updater', () => {
+    describe('emitter', () => {
       it('throw error if name is invalid', () => {
         const stateStream = new StateStream('stateStream', 0)
-        expect(() => stateStream.updater('', () => {})).toThrow()
-        expect(() => stateStream.updater('test', () => {})).not.toThrow()
+        expect(() => stateStream.emitter('', () => {})).toThrow()
+        expect(() => stateStream.emitter('test', () => {})).not.toThrow()
       })
 
-      it('throw error if _updater is not a function', () => {
+      it('throw error if updater is not a function', () => {
         const stateStream = new StateStream('stateStream', 0)
-        expect(() => stateStream.updater('test1')).toThrow()
-        expect(() => stateStream.updater('test2', () => {})).not.toThrow()
+        expect(() => stateStream.emitter('test1')).toThrow()
+        expect(() => stateStream.emitter('test2', () => {})).not.toThrow()
       })
 
-      it('update state through updater', () => {
+      it('update state through emitter', () => {
         const mockSubscriber = jest.fn()
         const stateStream = new StateStream('stateStream', 0)
 
-        stateStream.updater('updater1', value => prevState => (prevState + value))
+        stateStream.emitter('emitter1', value => prevState => (prevState + value))
         stateStream.state$.subscribe(mockSubscriber)
-        stateStream.updater1(1)
+        stateStream.emitter1(1)
 
-        expect(stateStream.updater1).toBeDefined()
-        expect(stateStream.updaters.updater1).toBeDefined()
+        expect(stateStream.emitter1).toBeDefined()
+        expect(stateStream.emitters.emitter1).toBeDefined()
         expect(mockSubscriber.mock.calls).toEqual([[0], [1]])
       })
     })

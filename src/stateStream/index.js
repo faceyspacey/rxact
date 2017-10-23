@@ -25,9 +25,9 @@ export interface IStateStream {
 
   state$: IESObservable,
 
-  updaters: Object,
+  emitters: Object,
 
-  updater(name: string, fn: Function): void,
+  emitter(name: string, updater: Function): void,
 
   subscriptions: Array<ISubscription>,
 
@@ -92,27 +92,27 @@ class StateStream implements IStateStream {
     return this.installPlugins()
   }
 
-  updaters = {}
+  emitters = {}
 
   subscriptions = []
 
   observers = []
 
-  updater(name: string, _updater: Function) {
+  emitter(name: string, updater: Function) {
     if (!name) {
-      throw new Error('updater(): name should not be blank.')
+      throw new Error('emitter(): name should not be blank.')
     }
 
-    if (typeof _updater !== 'function') {
-      throw new Error('updater(): expect second parameter to be a function.')
+    if (typeof updater !== 'function') {
+      throw new Error('emitter(): expect second parameter to be a function.')
     }
 
     // $flow-ignore
     this[name] = (...params) => {
-      this.next(_updater(...params))
+      this.next(updater(...params))
     }
     // $flow-ignore
-    this.updaters[name] = this[name]
+    this.emitters[name] = this[name]
   }
 
   dispose = () => {
