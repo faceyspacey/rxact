@@ -78,6 +78,23 @@ export default (Observable) => {
         expect(StateStream.plugins.length).toBe(3)
       })
 
+      it('use proxy returned by plugin', () => {
+        StateStream.addPlugin(instance => new Proxy(instance, {
+          get: (target, prop) => {
+            if (prop === 'test') {
+              return 'test'
+            }
+
+            return target[prop]
+          }
+        }))
+
+        const stream = new StateStream('stream')
+
+        expect(stream.test).toEqual('test')
+        expect(stream.state$).toBeDefined()
+      })
+
       it('remove plugin', () => {
         const plugin1 = () => {}
         const plugin2 = () => {}
