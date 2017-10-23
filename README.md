@@ -2,8 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/rxact.svg?style=flat-square)](https://www.npmjs.com/package/rxact)
 [![CircleCI master](https://img.shields.io/circleci/project/github/Darmody/rxact/master.svg?style=flat-square)](https://circleci.com/gh/Darmody/rxact/tree/master)
-[![Coverage](https://codeclimate.com/github/Darmody/rxact/badges/coverage.svg)](https://codeclimate.com/github/Darmody/rxact)
-[![Code Climate](https://codeclimate.com/github/Darmody/rxact/badges/gpa.svg)](https://codeclimate.com/github/Darmody/rxact)
+[![Coverage Status](https://coveralls.io/repos/github/Darmody/rxact/badge.svg?branch=master)](https://coveralls.io/github/Darmody/rxact?branch=master)
 
 Rxact is an observable state management for Javascript app.
 
