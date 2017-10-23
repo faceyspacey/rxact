@@ -15,7 +15,7 @@ yarn add rxact
 
 ## Getting Started
 
-Step 1, chosing your favorite observable lib.
+#### Step 1, chosing your favorite observable lib.
 
 `Rxact` supports any lib implement [ECMAScript Observable ](https://github.com/tc39/proposal-observable).
 including(but not only):
@@ -24,7 +24,7 @@ including(but not only):
 * [xstream](https://github.com/staltz/xstream) (combining with [rxact-xstream](https://github.com/Darmody/rxact-xstream))
 * more...
 
-Step 2, setup `Rxact`.
+#### Step 2, setup `Rxact`.
 
 Assume you chosed `RXJS`, then
 
@@ -36,7 +36,7 @@ import { setup } from 'rxact'
 setup({ Observable: Rx.Observable })
 ```
 
-Step 3, let's starting by writing a counter
+#### Step 3, let's start by writing a counter
 
 ```javascript
 import { StateStream } from 'rxact'
