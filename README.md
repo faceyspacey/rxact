@@ -40,6 +40,7 @@ yarn add rxact
 `Rxact` supports any lib implement [ECMAScript Observable ](https://github.com/tc39/proposal-observable).
 including(but not only):
 * [RxJS 5](https://github.com/ReactiveX/rxjs)
+* [Most](https://github.com/cujojs/most) (incredibly fast, functional API instead of fluent)
 * [zen-observable](https://github.com/zenparsing/zen-observable)
 * [xstream](https://github.com/staltz/xstream) (combining with [rxact-xstream](https://github.com/Darmody/rxact-xstream))
 * more...
